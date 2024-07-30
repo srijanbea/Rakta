@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ScrollView, TouchableOpacity, Alert} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { useNavigation } from 'expo-router';
 
 export default function SignUpScreen() {
@@ -16,16 +16,16 @@ export default function SignUpScreen() {
   const handleSignUp = () => {
     // Implement sign-up logic here
     Alert.alert(
-        'Registration Successful',
-        'You have been registered successfully!',
-        [
-          {
-            text: 'OK',
-            onPress: () => navigation.navigate('login'),
-          },
-        ],
-        { cancelable: false }
-      );
+      'Registration Successful',
+      'You have been registered successfully!',
+      [
+        {
+          text: 'OK',
+          onPress: () => navigation.navigate('login'),
+        },
+      ],
+      { cancelable: false }
+    );
   };
 
   const RadioButton = ({ label, value, selected, onSelect }) => (
@@ -38,80 +38,90 @@ export default function SignUpScreen() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.heading}>Register</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Full Name"
-        value={fullName}
-        onChangeText={setFullName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Contact No"
-        value={contactNo}
-        onChangeText={setContactNo}
-        keyboardType="phone-pad"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Address"
-        value={address}
-        onChangeText={setAddress}
-      />
-      <Text style={styles.label}>Blood Group</Text>
-      <View style={styles.radioGroup}>
-        {['A', 'B', 'O', 'AB'].map((group) => (
-          <RadioButton
-            key={group}
-            label={group}
-            value={group}
-            selected={bloodGroup === group}
-            onSelect={setBloodGroup}
-          />
-        ))}
+      <View style={styles.form}>
+        <TextInput
+          style={styles.input}
+          placeholder="Full Name"
+          value={fullName}
+          onChangeText={setFullName}
+          placeholderTextColor="#aaa"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Contact No"
+          value={contactNo}
+          onChangeText={setContactNo}
+          keyboardType="phone-pad"
+          placeholderTextColor="#aaa"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Address"
+          value={address}
+          onChangeText={setAddress}
+          placeholderTextColor="#aaa"
+        />
+        <Text style={styles.label}>Blood Group</Text>
+        <View style={styles.radioGroup}>
+          {['A', 'B', 'O', 'AB'].map((group) => (
+            <RadioButton
+              key={group}
+              label={group}
+              value={group}
+              selected={bloodGroup === group}
+              onSelect={setBloodGroup}
+            />
+          ))}
+        </View>
+        <Text style={styles.label}>RH</Text>
+        <View style={styles.radioGroup}>
+          {['+ve', '-ve'].map((factor) => (
+            <RadioButton
+              key={factor}
+              label={factor}
+              value={factor}
+              selected={rh === factor}
+              onSelect={setRh}
+            />
+          ))}
+        </View>
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          placeholderTextColor="#aaa"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Password"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          autoCapitalize="none"
+          placeholderTextColor="#aaa"
+        />
+        <TextInput
+          style={styles.input}
+          placeholder="Confirm Password"
+          value={confirmPassword}
+          onChangeText={setConfirmPassword}
+          secureTextEntry
+          autoCapitalize="none"
+          placeholderTextColor="#aaa"
+        />
+        <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
+          <Text style={styles.signUpButtonText}>Sign Up</Text>
+        </TouchableOpacity>
       </View>
-      <Text style={styles.label}>RH</Text>
-      <View style={styles.radioGroup}>
-        {['+ve', '-ve'].map((factor) => (
-          <RadioButton
-            key={factor}
-            label={factor}
-            value={factor}
-            selected={rh === factor}
-            onSelect={setRh}
-          />
-        ))}
+      <View style={styles.loginContainer}>
+        <Text style={styles.loginText}>Already have an account? </Text>
+        <TouchableOpacity onPress={() => navigation.navigate('login')}>
+          <Text style={styles.loginButton}>Login</Text>
+        </TouchableOpacity>
       </View>
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        autoCapitalize="none"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Confirm Password"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-        autoCapitalize="none"
-      />
-      <Button title="Sign Up" onPress={handleSignUp} />
-      <Text style={styles.loginText}>
-        Already have an account?{' '}
-        <Text style={styles.loginLink} onPress={() => navigation.navigate('login')}>
-          Login
-        </Text>
-      </Text>
     </ScrollView>
   );
 }
@@ -121,22 +131,25 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#f7f7f7',
+    backgroundColor: '#fff',
+    padding: 20,
   },
   heading: {
-    fontSize: 24,
+    fontSize: 30,
+    color: '#333',
+    marginBottom: 20,
     fontWeight: 'bold',
-    marginBottom: 32,
+  },
+  form: {
+    width: '100%',
   },
   input: {
-    width: '100%',
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 4,
-    marginBottom: 16,
-    paddingHorizontal: 8,
+    height: 50,
+    backgroundColor: '#f0f0f0',
+    borderRadius: 25,
+    paddingHorizontal: 20,
+    marginBottom: 20,
+    fontSize: 16,
   },
   label: {
     width: '100%',
@@ -166,17 +179,32 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   radioButtonSelected: {
-    backgroundColor: '#f4511e',
+    backgroundColor: '#ff7e5f',
   },
   radioButtonLabel: {
     fontSize: 16,
   },
-  loginText: {
-    marginTop: 16,
-    fontSize: 16,
+  signUpButton: {
+    backgroundColor: '#ff7e5f',
+    paddingVertical: 15,
+    borderRadius: 25,
+    alignItems: 'center',
+    marginBottom: 20,
   },
-  loginLink: {
-    color: '#f4511e',
+  signUpButtonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  loginContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  loginText: {
+    color: '#333',
+  },
+  loginButton: {
+    color: '#ff7e5f',
     fontWeight: 'bold',
   },
 });
