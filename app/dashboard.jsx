@@ -5,14 +5,14 @@ import { useNavigation } from 'expo-router';
 export default function DashboardScreen() {
   const navigation = useNavigation();
 
-  const handleLogout = () => {
+  const navigateToLoginScreen = () => {
     navigation.navigate('login');
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Welcome to the Dashboard!</Text>
-      <Button title="Logout" onPress={handleLogout} />
+      <Text style={styles.heading}>Dashboard</Text>
+      <Button title="Back to login" onPress={navigateToLoginScreen} />
     </View>
   );
 }
