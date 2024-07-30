@@ -11,8 +11,8 @@ export default function DashboardScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Dashboard</Text>
-      <Button title="Back to login" onPress={navigateToLoginScreen} />
+      <Text style={styles.heading}>User Dashboard</Text>
+      <Button title="Logout" onPress={navigateToLoginScreen} />
     </View>
   );
 }

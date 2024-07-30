@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, KeyboardAvoidingView, Platform, SafeAreaView, ActivityIndicator } from 'react-native';
 import { useNavigation } from 'expo-router';
 import { auth, db } from '../firebaseConfig'; // Adjust path as needed
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
 
 export default function SignUpScreen() {
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [loading, setLoading] = useState(false);
     const navigation = useNavigation();
 
     const handleSignUp = async () => {
@@ -18,7 +19,19 @@ export default function SignUpScreen() {
             return;
         }
 
+        setLoading(true); // Show loading indicator
+
         try {
+            // Check if the username already exists
+            const usersRef = collection(db, 'users');
+            const q = query(usersRef, where('username', '==', username));
+            const querySnapshot = await getDocs(q);
+
+            if (!querySnapshot.empty) {
+                Alert.alert('Error', 'Username is already taken');
+                return;
+            }
+
             // Create user with email and password
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user; // This user object contains the UID
@@ -37,8 +50,14 @@ export default function SignUpScreen() {
                 { cancelable: false }
             );
         } catch (error) {
-            Alert.alert('Error', 'An error occurred during registration');
-            console.error(error);
+            const errorCode = error.code;
+            if (errorCode === 'auth/email-already-in-use') {
+                Alert.alert('Error', 'Email is already in use');
+            } else {
+                Alert.alert('Error', 'An error occurred during registration');
+            }
+        } finally {
+            setLoading(false); // Hide loading indicator
         }
     };
 
@@ -49,52 +68,60 @@ export default function SignUpScreen() {
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             >
                 <ScrollView contentContainerStyle={styles.scrollView}>
-                    <Text style={styles.heading}>Register</Text>
-                    <View style={styles.form}>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Username"
-                            value={username}
-                            onChangeText={setUsername}
-                            placeholderTextColor="#aaa"
-                        />
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Email"
-                            value={email}
-                            onChangeText={setEmail}
-                            keyboardType="email-address"
-                            autoCapitalize="none"
-                            placeholderTextColor="#aaa"
-                        />
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Password"
-                            value={password}
-                            onChangeText={setPassword}
-                            secureTextEntry
-                            autoCapitalize="none"
-                            placeholderTextColor="#aaa"
-                        />
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Confirm Password"
-                            value={confirmPassword}
-                            onChangeText={setConfirmPassword}
-                            secureTextEntry
-                            autoCapitalize="none"
-                            placeholderTextColor="#aaa"
-                        />
-                        <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
-                            <Text style={styles.signUpButtonText}>Sign Up</Text>
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.loginContainer}>
-                        <Text style={styles.loginText}>Already have an account? </Text>
-                        <TouchableOpacity onPress={() => navigation.navigate('login')}>
-                            <Text style={styles.loginButton}>Login</Text>
-                        </TouchableOpacity>
-                    </View>
+                    {loading ? (
+                        <View style={styles.loadingContainer}>
+                            <ActivityIndicator size="large" color="#ff7e5f" />
+                        </View>
+                    ) : (
+                        <>
+                            <Text style={styles.heading}>Register</Text>
+                            <View style={styles.form}>
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Username"
+                                    value={username}
+                                    onChangeText={setUsername}
+                                    placeholderTextColor="#aaa"
+                                />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Email"
+                                    value={email}
+                                    onChangeText={setEmail}
+                                    keyboardType="email-address"
+                                    autoCapitalize="none"
+                                    placeholderTextColor="#aaa"
+                                />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Password"
+                                    value={password}
+                                    onChangeText={setPassword}
+                                    secureTextEntry
+                                    autoCapitalize="none"
+                                    placeholderTextColor="#aaa"
+                                />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Confirm Password"
+                                    value={confirmPassword}
+                                    onChangeText={setConfirmPassword}
+                                    secureTextEntry
+                                    autoCapitalize="none"
+                                    placeholderTextColor="#aaa"
+                                />
+                                <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
+                                    <Text style={styles.signUpButtonText}>Sign Up</Text>
+                                </TouchableOpacity>
+                            </View>
+                            <View style={styles.loginContainer}>
+                                <Text style={styles.loginText}>Already have an account? </Text>
+                                <TouchableOpacity onPress={() => navigation.navigate('login')}>
+                                    <Text style={styles.loginButton}>Login</Text>
+                                </TouchableOpacity>
+                            </View>
+                        </>
+                    )}
                 </ScrollView>
             </KeyboardAvoidingView>
         </SafeAreaView>
@@ -154,5 +181,11 @@ const styles = StyleSheet.create({
     loginButton: {
         color: '#ff7e5f',
         fontWeight: 'bold',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#fff',
     },
 });

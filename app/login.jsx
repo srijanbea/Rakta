@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, Alert, KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
-import { useNavigation } from 'expo-router';
+import { useNavigation, useRouter } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebaseConfig'; // Adjust the path to your firebaseConfig
 
@@ -22,6 +22,7 @@ export default function LoginScreen() {
             const errorMessage = error.message;
             if (errorCode === 'auth/invalid-credential'){
               Alert.alert('Invalid Credentials')
+              setPassword('');
             }
             console.log(errorMessage);
         }
@@ -129,7 +130,7 @@ const styles = StyleSheet.create({
     forgotPassword: {
         color: '#ff7e5f',
         textAlign: 'center',
-        marginBottom: 40,
+        marginBottom: 130,
     },
     signupContainer: {
         flexDirection: 'row',
