@@ -59,7 +59,6 @@ export default function DashboardScreen() {
   const navigateToNotifications = () => {
     navigation.navigate('notifications'); // Make sure this is the correct route name for the Notifications
   };
-
   return (
     <View style={styles.container}>
       <View style={styles.titleBar}>
@@ -86,19 +85,19 @@ export default function DashboardScreen() {
           Each donation can help save up to <Text style={styles.boldText}>3 lives!</Text>
         </Text>
         <View style={styles.optionsContainer}>
-          <TouchableOpacity style={styles.optionCard} onPress={() => navigation.navigate('CreateDonorProfile')}>
+          <TouchableOpacity style={styles.optionCard} onPress={() => navigation.navigate('donorprofile')}>
             <Icon name="person-add" size={35} color="#004aad" />
             <Text style={styles.optionTitle}>Create Donor Profile</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.optionCard} onPress={() => navigation.navigate('DonateBlood')}>
+          <TouchableOpacity style={styles.optionCard} onPress={() => navigation.navigate('donateblood')}>
             <Icon name="bloodtype" size={35} color="#004aad" />
             <Text style={styles.optionTitle}>Donate Blood</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.optionCard} onPress={() => navigation.navigate('RequestForBlood')}>
+          <TouchableOpacity style={styles.optionCard} onPress={() => navigation.navigate('requestblood')}>
             <Icon name="diversity-1" size={35} color="#004aad" />
             <Text style={styles.optionTitle}>Request Blood</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.optionCard} onPress={() => navigation.navigate('DonationHistory')}>
+          <TouchableOpacity style={styles.optionCard} onPress={() => navigation.navigate('donationhistory')}>
             <Icon name="history" size={35} color="#004aad" />
             <Text style={styles.optionTitle}>My Records</Text>
           </TouchableOpacity>

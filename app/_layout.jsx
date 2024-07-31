@@ -36,6 +36,54 @@ export default function RootLayout() {
         ),
          }} />
       <Stack.Screen name="dashboard" options={{ headerShown: false }} />
+      <Stack.Screen name="donorprofile" options={{
+        headerShown: true,
+        title: '',
+        headerLeft: () => (
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={{ padding: 5, flexDirection: 'row', alignItems: 'center'}}
+          >
+            <Icon name="arrow-back" size={25} color="#fff" />
+          </TouchableOpacity>
+        ),
+      }} />
+      <Stack.Screen name="donateblood" options={{
+        headerShown: true,
+        title: '',
+        headerLeft: () => (
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={{ padding: 5, flexDirection: 'row', alignItems: 'center'}}
+          >
+            <Icon name="arrow-back" size={25} color="#fff" />
+          </TouchableOpacity>
+        ),
+      }} />
+      <Stack.Screen name="requestblood" options={{
+        headerShown: true,
+        title: '',
+        headerLeft: () => (
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={{ padding: 5, flexDirection: 'row', alignItems: 'center'}}
+          >
+            <Icon name="arrow-back" size={25} color="#fff" />
+          </TouchableOpacity>
+        ),
+      }} />
+      <Stack.Screen name="donationhistory" options={{
+        headerShown: true,
+        title: '',
+        headerLeft: () => (
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={{ padding: 5, flexDirection: 'row', alignItems: 'center'}}
+          >
+            <Icon name="arrow-back" size={25} color="#fff" />
+          </TouchableOpacity>
+        ),
+      }} />
       <Stack.Screen name="bloodbanks" options={{ headerShown: false }} />
       <Stack.Screen name="profile" options={{ headerShown: false }} />
       <Stack.Screen
