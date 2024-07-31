@@ -18,7 +18,10 @@ export default function LoginScreen() {
             await signInWithEmailAndPassword(auth, email, password);
 
             // If successful, navigate to Dashboard
-            navigation.navigate('dashboard');
+            navigation.reset({
+                index: 0,
+                routes: [{name: 'dashboard'}],
+            });
         } catch (error) {
             // Handle Firebase authentication errors
             const errorCode = error.code;
@@ -141,29 +144,30 @@ const styles = StyleSheet.create({
     forgotPassword: {
         color: '#ff7e5f',
         textAlign: 'center',
-        marginBottom: 130,
     },
     signupContainer: {
         flexDirection: 'row',
         alignItems: 'center',
     },
     signupText: {
+        marginTop: 130,
         color: '#333',
     },
     signupButton: {
+        marginTop: 130,
         color: '#ff7e5f',
         fontWeight: 'bold',
     },
     overlay: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: '#fff',
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 1000,
     },
     loadingText: {
         marginTop: 10,
-        color: '#fff',
+        color: '#ff7e5f',
         fontSize: 16,
     },
 });
