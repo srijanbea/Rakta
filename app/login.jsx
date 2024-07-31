@@ -1,15 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, Alert, KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
-import { useNavigation, useRouter } from 'expo-router';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, Alert, KeyboardAvoidingView, Platform, SafeAreaView, ActivityIndicator } from 'react-native';
+import { useNavigation } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebaseConfig'; // Adjust the path to your firebaseConfig
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
     const navigation = useNavigation();
 
     const handleLogin = async () => {
+        setLoading(true); // Show loading indicator
+
         try {
             // Authenticate the user with Firebase
             await signInWithEmailAndPassword(auth, email, password);
@@ -20,11 +23,13 @@ export default function LoginScreen() {
             // Handle Firebase authentication errors
             const errorCode = error.code;
             const errorMessage = error.message;
-            if (errorCode === 'auth/invalid-credential'){
-              Alert.alert('Invalid Credentials')
-              setPassword('');
+            if (errorCode === 'auth/invalid-credential') {
+                Alert.alert('Invalid Credentials');
+                setPassword('');
             }
             console.log(errorMessage);
+        } finally {
+            setLoading(false); // Hide loading indicator
         }
     };
 
@@ -58,7 +63,7 @@ export default function LoginScreen() {
                             autoCapitalize="none"
                             placeholderTextColor="#aaa"
                         />
-                        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+                        <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={loading}>
                             <Text style={styles.loginButtonText}>Login</Text>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => navigation.navigate('forgotpassword')}>
@@ -73,6 +78,12 @@ export default function LoginScreen() {
                     </View>
                 </ScrollView>
             </KeyboardAvoidingView>
+            {loading && (
+                <View style={styles.overlay}>
+                    <ActivityIndicator size="large" color="#ff7e5f" />
+                    <Text style={styles.loadingText}>Please wait...</Text>
+                </View>
+            )}
         </SafeAreaView>
     );
 }
@@ -142,5 +153,17 @@ const styles = StyleSheet.create({
     signupButton: {
         color: '#ff7e5f',
         fontWeight: 'bold',
+    },
+    overlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1000,
+    },
+    loadingText: {
+        marginTop: 10,
+        color: '#fff',
+        fontSize: 16,
     },
 });

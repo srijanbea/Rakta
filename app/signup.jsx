@@ -164,7 +164,6 @@ const styles = StyleSheet.create({
         paddingVertical: 15,
         borderRadius: 25,
         alignItems: 'center',
-        marginBottom: 20,
     },
     signUpButtonText: {
         color: '#fff',
@@ -172,6 +171,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     loginContainer: {
+        marginTop: 20,
         flexDirection: 'row',
         alignItems: 'center',
     },
