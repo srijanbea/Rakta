@@ -4,12 +4,19 @@ import { useNavigation } from 'expo-router';
 export default function OnboardingScreen() {
   const navigation = useNavigation();
 
+  const handleGetStarted = () => {
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'login' }],
+    });
+  };
+
   return (
     <View style={styles.container}>
       <Image source={require('../assets/images/logo.png')} style={styles.image} />
       <Text style={styles.title}>Rakta</Text>
       <Text style={styles.subtitle}>Your reliable blood donation companion.</Text>
-      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('login')}>
+      <TouchableOpacity style={styles.button} onPress={handleGetStarted}>
         <Text style={styles.buttonText}>Get Started</Text>
       </TouchableOpacity>
     </View>
