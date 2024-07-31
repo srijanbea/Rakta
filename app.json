@@ -4,13 +4,13 @@
     "slug": "Rakta",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/logo.png",
+    "icon": "./assets/images/splash.png",
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#fc573b"
+      "backgroundColor": "#004aad"
     },
     "ios": {
       "supportsTablet": true

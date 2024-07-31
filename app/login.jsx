@@ -20,7 +20,7 @@ export default function LoginScreen() {
             // If successful, navigate to Dashboard
             navigation.reset({
                 index: 0,
-                routes: [{name: 'dashboard'}],
+                routes: [{ name: 'dashboard' }],
             });
         } catch (error) {
             // Handle Firebase authentication errors
@@ -44,7 +44,7 @@ export default function LoginScreen() {
             >
                 <ScrollView contentContainerStyle={styles.scrollView}>
                     <View style={styles.logoContainer}>
-                        <Image source={require('../assets/images/logo.png')} style={styles.logo} />
+                        <Image source={require('../assets/images/rakta-logo-blue.png')} style={styles.logo} resizeMode="contain" />
                     </View>
                     <Text style={styles.welcomeText}>Welcome</Text>
                     <View style={styles.form}>
@@ -83,7 +83,7 @@ export default function LoginScreen() {
             </KeyboardAvoidingView>
             {loading && (
                 <View style={styles.overlay}>
-                    <ActivityIndicator size="large" color="#ff7e5f" />
+                    <ActivityIndicator size="large" color="#004aad" />
                     <Text style={styles.loadingText}>Please wait...</Text>
                 </View>
             )}
@@ -106,11 +106,14 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     logoContainer: {
-        marginBottom: 30,
+        marginBottom: 70,
+        width: '100%', // Ensure the logo container takes full width
+        alignItems: 'center', // Center the logo horizontally
     },
     logo: {
-        width: 150,
-        height: 150,
+        width: '100%', // Ensure the logo takes full width of its container
+        height: undefined, // Let the height adjust based on the aspect ratio
+        aspectRatio: 2, // Adjust this if needed, e.g., 1 for square, or the actual aspect ratio of your image
     },
     welcomeText: {
         fontSize: 30,
@@ -130,7 +133,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
     loginButton: {
-        backgroundColor: '#ff7e5f',
+        backgroundColor: '#004aad',
         paddingVertical: 15,
         borderRadius: 25,
         alignItems: 'center',
@@ -142,7 +145,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     forgotPassword: {
-        color: '#ff7e5f',
+        color: '#004aad',
         textAlign: 'center',
     },
     signupContainer: {
@@ -155,7 +158,7 @@ const styles = StyleSheet.create({
     },
     signupButton: {
         marginTop: 130,
-        color: '#ff7e5f',
+        color: '#004aad',
         fontWeight: 'bold',
     },
     overlay: {
@@ -167,7 +170,7 @@ const styles = StyleSheet.create({
     },
     loadingText: {
         marginTop: 10,
-        color: '#ff7e5f',
+        color: '#004aad',
         fontSize: 16,
     },
 });

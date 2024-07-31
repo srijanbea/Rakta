@@ -8,22 +8,21 @@ export default function BloodBanksScreen() {
   const navigation = useNavigation();
 
   const navigateToNotifications = () => {
-    navigation.navigate('Notifications'); // Make sure this is the correct route name for the Notifications
+    navigation.navigate('notifications'); // Make sure this is the correct route name for the Notifications
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.titleBar}>
-        <Text style={styles.titleText}>Blood Banks</Text>
         <TouchableOpacity onPress={navigateToNotifications}>
-          <Icon name="notifications" size={30} color="#fff" />
+          <Icon name="notifications" size={25} color="#fff" />
         </TouchableOpacity>
       </View>
       <View style={styles.content}>
         <Text style={styles.infoText}>Blood Banks Section</Text>
         {/* Add the content for blood banks information here */}
       </View>
-      <BottomNavBar activeScreen="bloodBanks" />
+      <BottomNavBar activeScreen="bloodbanks" />
     </View>
   );
 }
@@ -36,17 +35,12 @@ const styles = StyleSheet.create({
   },
   titleBar: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
-    backgroundColor: '#ff7e5f',
+    backgroundColor: '#004aad',
     paddingTop: Platform.OS === 'ios' ? 40 : StatusBar.currentHeight,
     paddingBottom: 16,
     paddingHorizontal: 16,
-  },
-  titleText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
   },
   content: {
     flex: 1, // Takes the available space between the title bar and bottom nav

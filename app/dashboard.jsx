@@ -1,6 +1,5 @@
-// DashboardScreen.js
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, StyleSheet, Alert, Platform, StatusBar, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Alert, Platform, StatusBar, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from 'expo-router';
 import { getAuth, signOut } from 'firebase/auth';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
@@ -11,6 +10,8 @@ import BottomNavBar from './bottomnavbar'; // Adjust the path as needed
 export default function DashboardScreen() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [fullName, setFullName] = useState(''); // Ensure this is initialized
+  const [profilePicture, setProfilePicture] = useState('');
   const navigation = useNavigation();
   const auth = getAuth();
   const firestore = getFirestore();
@@ -30,6 +31,16 @@ export default function DashboardScreen() {
           if (!querySnapshot.empty) {
             const userDoc = querySnapshot.docs[0].data();
             setUsername(userDoc.username);
+            setFullName(userDoc.fullName); // Ensure fullName is set correctly
+            setProfilePicture(userDoc.profilePicture);
+
+            // Store user details in AsyncStorage
+            await AsyncStorage.setItem('userDetails', JSON.stringify({
+              username: userDoc.username,
+              email: userDoc.email,
+              fullName: userDoc.fullName,
+              profilePicture: userDoc.profilePicture
+            }));
           } else {
             console.log('No such document!');
           }
@@ -45,21 +56,6 @@ export default function DashboardScreen() {
     fetchUserDetails();
   }, [auth, firestore]);
 
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      await AsyncStorage.removeItem('userEmail'); // Clear the email from AsyncStorage
-
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'login' }],
-      });
-    } catch (error) {
-      console.log('Error logging out:', error);
-      Alert.alert('Error', 'Failed to log out.');
-    }
-  };
-
   const navigateToNotifications = () => {
     navigation.navigate('notifications'); // Make sure this is the correct route name for the Notifications
   };
@@ -67,23 +63,47 @@ export default function DashboardScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.titleBar}>
-        <Text style={styles.titleText}>Dashboard</Text>
         <TouchableOpacity onPress={navigateToNotifications}>
-          <Icon name="notifications" size={30} color="#fff" />
+          <Icon name="notifications" size={25} color="#fff" />
         </TouchableOpacity>
       </View>
-      <View style={styles.content}>
-        <View style={styles.infoContainer}>
-          <Text style={styles.details}>Email: {email}</Text>
-          <Text style={styles.details}>Username: {username}</Text>
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={styles.subtitle}>GIVE THE GIFT OF LIFE</Text>
+        <Text style={styles.heading}>
+          Donate <Text style={styles.bold}>Blood</Text>
+        </Text>
+        <View style={styles.statsContainer}>
+          <View style={[styles.statsCard, styles.statsCardAccent]}>
+            <Text style={styles.statsCountAccent}>0</Text>
+            <Text style={styles.statsLabelAccent}>Blood Requested</Text>
+          </View>
+          <View style={[styles.statsCard, styles.statsCardDefault]}>
+            <Text style={styles.statsCount}>0</Text>
+            <Text style={styles.statsLabel}>Lives Saved</Text>
+          </View>
         </View>
-        <View style={styles.actionsContainer}>
-          <Button title="Donate Blood" onPress={() => navigation.navigate('DonateBlood')} color="#ff7e5f" />
-          <Button title="Find a Donor" onPress={() => navigation.navigate('FindDonor')} color="#ff7e5f" />
-          <Button title="My Profile" onPress={() => navigation.navigate('Profile')} color="#ff7e5f" />
-          <Button title="Logout" onPress={handleLogout} color="#ff7e5f" />
+        <Text style={styles.helpText}>
+          Each donation can help save up to <Text style={styles.boldText}>3 lives!</Text>
+        </Text>
+        <View style={styles.optionsContainer}>
+          <TouchableOpacity style={styles.optionCard} onPress={() => navigation.navigate('CreateDonorProfile')}>
+            <Icon name="person-add" size={35} color="#004aad" />
+            <Text style={styles.optionTitle}>Create Donor Profile</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.optionCard} onPress={() => navigation.navigate('DonateBlood')}>
+            <Icon name="bloodtype" size={35} color="#004aad" />
+            <Text style={styles.optionTitle}>Donate Blood</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.optionCard} onPress={() => navigation.navigate('RequestForBlood')}>
+            <Icon name="diversity-1" size={35} color="#004aad" />
+            <Text style={styles.optionTitle}>Request Blood</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.optionCard} onPress={() => navigation.navigate('DonationHistory')}>
+            <Icon name="history" size={35} color="#004aad" />
+            <Text style={styles.optionTitle}>My Records</Text>
+          </TouchableOpacity>
         </View>
-      </View>
+      </ScrollView>
       <BottomNavBar activeScreen="dashboard" />
     </View>
   );
@@ -97,47 +117,108 @@ const styles = StyleSheet.create({
   },
   titleBar: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
-    backgroundColor: '#ff7e5f',
+    backgroundColor: '#004aad',
     paddingTop: Platform.OS === 'ios' ? 40 : StatusBar.currentHeight,
     paddingBottom: 16,
     paddingHorizontal: 16,
   },
-  titleText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#fff',
-  },
   content: {
-    flex: 1, // Takes the available space between the title bar and bottom nav
     padding: 16,
+    flexGrow: 1, // Ensures the content area grows to fill available space
   },
-  infoContainer: {
-    marginBottom: 16,
-    padding: 16,
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  details: {
-    fontSize: 18,
+  subtitle: {
+    fontSize: 14,
+    color: '#000',
+    textAlign: 'center',
     marginBottom: 8,
-    color: '#333',
   },
-  actionsContainer: {
-    padding: 16,
-    backgroundColor: '#fff',
-    borderRadius: 8,
+  heading: {
+    fontSize: 40,
+    color: '#004aad',
+    fontWeight: 'normal', // Normal weight for 'Donate'
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  bold: {
+    fontWeight: 'bold', // Bold weight for 'Blood'
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center', // Center cards horizontally
+    marginBottom: 16, // Space between stats and cards below
+  },
+  statsCard: {
+    width: '45%', // Increase width of each card
+    aspectRatio: 1, // Make the card square
+    padding: 16, // Increase padding
+    borderRadius: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-    marginTop: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 8, // Add horizontal margin for spacing
+  },
+  statsCardAccent: {
+    backgroundColor: '#004aad', // Accent color for the first card
+  },
+  statsCardDefault: {
+    backgroundColor: '#f8f8ff', // Default background color for the second card
+  },
+  statsCountAccent: {
+    fontSize: 60, // Decrease font size for the count
+    fontWeight: 'bold',
+    color: '#fff', // White color for the digit on the accent card
+    marginBottom: 4, // Space between digit and text
+  },
+  statsLabelAccent: {
+    fontSize: 12, // Decrease font size for the label
+    color: '#fff', // White color for text on the accent card
+    fontWeight: 'bold',
+  },
+  statsCount: {
+    fontSize: 60, // Decrease font size for the count
+    fontWeight: 'bold',
+    color: '#aaa', // Color for the digit on the default card
+    marginBottom: 4, // Space between digit and text
+  },
+  statsLabel: {
+    fontSize: 12, // Decrease font size for the label
+    color: '#aaa', // Grey color for text on the default card
+    fontWeight: 'bold',
+  },
+  helpText: {
+    fontSize: 16, // Adjust font size
+    color: 'grey', // Grey color for the text
+    textAlign: 'center',
+    marginBottom: 16, // Space below the help text
+  },
+  boldText: {
+    fontWeight: 'bold', // Bold weight for '3 lives !'
+  },
+  optionsContainer: {
+    marginBottom: 16,
+  },
+  optionCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16, // Increase padding
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    shadowColor: '#004aad',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    marginBottom: 12, // Increase margin between cards
+  },
+  optionTitle: {
+    fontSize: 18, // Increase font size
+    color: '#333',
+    marginLeft: 12, // Increase margin between icon and text
   },
 });

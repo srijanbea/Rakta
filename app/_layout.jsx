@@ -11,19 +11,30 @@ export default function RootLayout() {
     <Stack
       screenOptions={{
         headerStyle: {
-          backgroundColor: '#ff7e5f',
+          backgroundColor: '#004aad',
         },
         headerTintColor: '#fff',
         headerTitleStyle: {
           fontWeight: 'bold',
         },
-        gestureEnabled: false,
+        gestureEnabled: true,
         ...TransitionPresets.SlideFromRightIOS, // Add the transition preset here
       }}
     >
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="login" options={{ headerShown: false }} />
-      <Stack.Screen name="signup" options={{ headerShown: false }} />
+      <Stack.Screen name="signup" options={{ 
+        headerShown: true,
+        title: '',
+        headerLeft: () => (
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={{ padding: 5, flexDirection: 'row', alignItems: 'center'}}
+          >
+            <Icon name="arrow-back" size={25} color="#fff" />
+          </TouchableOpacity>
+        ),
+         }} />
       <Stack.Screen name="dashboard" options={{ headerShown: false }} />
       <Stack.Screen name="bloodbanks" options={{ headerShown: false }} />
       <Stack.Screen name="profile" options={{ headerShown: false }} />
@@ -33,19 +44,19 @@ export default function RootLayout() {
           headerShown: true,
           title: 'Notifications',
           headerStyle: {
-            backgroundColor: '#ff7e5f', // Change this to match your design
+            backgroundColor: '#004aad', // Change this to match your design
           },
           headerTintColor: '#fff',
           headerTitleStyle: {
             fontWeight: 'bold',
-            fontSize: 24,
+            fontSize: 16,
           },
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => navigation.goBack()}
               style={{ padding: 5, flexDirection: 'row', alignItems: 'center'}}
             >
-              <Icon name="arrow-back" size={28} color="#fff" />
+              <Icon name="arrow-back" size={25} color="#fff" />
             </TouchableOpacity>
           ),
         }}
