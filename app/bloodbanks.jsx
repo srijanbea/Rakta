@@ -2,13 +2,13 @@ import React from 'react';
 import { View, Text, StyleSheet, Platform, StatusBar, TouchableOpacity } from 'react-native';
 import { useNavigation } from 'expo-router';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import BottomNavBar from './bottomnavbar'; // Adjust the path as needed
+import BottomNavBar from './bottomnavbar';
 
 export default function BloodBanksScreen() {
   const navigation = useNavigation();
 
   const navigateToNotifications = () => {
-    navigation.navigate('notifications'); // Make sure this is the correct route name for the Notifications
+    navigation.navigate('notifications');
   };
 
   return (

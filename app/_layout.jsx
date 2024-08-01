@@ -2,7 +2,7 @@ import { Stack } from 'expo-router';
 import { TransitionPresets } from '@react-navigation/stack';
 import { TouchableOpacity, Text, View } from 'react-native';
 import { useNavigation } from 'expo-router';
-import Icon from 'react-native-vector-icons/Ionicons'; // Import the icon library
+import Icon from 'react-native-vector-icons/Ionicons';
 
 export default function RootLayout() {
   const navigation = useNavigation();
@@ -18,7 +18,7 @@ export default function RootLayout() {
           fontWeight: 'bold',
         },
         gestureEnabled: true,
-        ...TransitionPresets.SlideFromRightIOS, // Add the transition preset here
+        ...TransitionPresets.SlideFromRightIOS,
       }}
     >
       <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -92,7 +92,7 @@ export default function RootLayout() {
           headerShown: true,
           title: 'Notifications',
           headerStyle: {
-            backgroundColor: '#004aad', // Change this to match your design
+            backgroundColor: '#004aad',
           },
           headerTintColor: '#fff',
           headerTitleStyle: {
