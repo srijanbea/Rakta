@@ -3,10 +3,12 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView,
 import { useNavigation } from 'expo-router';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebaseConfig'; // Adjust the path to your firebaseConfig
+import { Ionicons } from '@expo/vector-icons'; // Import Ionicons for icon usage
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [focusedInput, setFocusedInput] = useState(null);
     const [loading, setLoading] = useState(false);
     const navigation = useNavigation();
 
@@ -35,6 +37,18 @@ export default function LoginScreen() {
             setLoading(false); // Hide loading indicator
         }
     };
+    const getInputContainerStyle = (inputName) => ({
+        ...styles.inputContainer,
+        borderColor: focusedInput === inputName ? 'transparent' : '#f0f0f0',
+        backgroundColor: focusedInput === inputName ? '#e6f0ff' : '#f0f0f0',
+    });
+
+    const getIconStyle = (inputName) => ({
+        ...styles.icon,
+        color: focusedInput === inputName ? '#004aad' : '#aaa',
+    });
+
+    const getPlaceholderTextColor = (inputName) => focusedInput === inputName ? '#004aad' : '#aaa';
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -48,24 +62,34 @@ export default function LoginScreen() {
                     </View>
                     <Text style={styles.welcomeText}>Welcome</Text>
                     <View style={styles.form}>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Email"
-                            value={email}
-                            onChangeText={setEmail}
-                            keyboardType="email-address"
-                            autoCapitalize="none"
-                            placeholderTextColor="#aaa"
-                        />
-                        <TextInput
-                            style={styles.input}
-                            placeholder="Password"
-                            value={password}
-                            onChangeText={setPassword}
-                            secureTextEntry
-                            autoCapitalize="none"
-                            placeholderTextColor="#aaa"
-                        />
+                    <View style={getInputContainerStyle('email')}>
+                            <Ionicons name="mail-outline" size={20} style={getIconStyle('email')} />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Email"
+                                value={email}
+                                onChangeText={setEmail}
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                                placeholderTextColor={getPlaceholderTextColor('email')}
+                                onFocus={() => setFocusedInput('email')}
+                                onBlur={() => setFocusedInput(null)}
+                            />
+                        </View>
+                        <View style={getInputContainerStyle('password')}>
+                            <Ionicons name="lock-closed-outline" size={20} style={getIconStyle('password')} />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Password"
+                                value={password}
+                                onChangeText={setPassword}
+                                secureTextEntry
+                                autoCapitalize="none"
+                                placeholderTextColor={getPlaceholderTextColor('password')}
+                                onFocus={() => setFocusedInput('password')}
+                                onBlur={() => setFocusedInput(null)}
+                            />
+                        </View>
                         <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={loading}>
                             <Text style={styles.loginButtonText}>Login</Text>
                         </TouchableOpacity>
@@ -124,7 +148,9 @@ const styles = StyleSheet.create({
     form: {
         width: '100%',
     },
-    input: {
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
         height: 50,
         backgroundColor: '#f0f0f0',
         borderRadius: 25,
@@ -132,6 +158,17 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         fontSize: 16,
     },
+    input: {
+        flex: 1,
+        height: 50,
+        fontSize: 16,
+        paddingHorizontal: 10,
+    },
+    
+    icon: {
+        marginRight: 10,
+    },
+
     loginButton: {
         backgroundColor: '#004aad',
         paddingVertical: 15,
@@ -163,7 +200,7 @@ const styles = StyleSheet.create({
     },
     overlay: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: '#fff',
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 1000,

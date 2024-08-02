@@ -13,7 +13,6 @@ import { format } from 'date-fns';
 const screenWidth = Dimensions.get('window').width;
 
 export default function DashboardScreen() {
-  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
   const [profilePicture, setProfilePicture] = useState('');
@@ -39,12 +38,10 @@ export default function DashboardScreen() {
         const querySnapshot = await getDocs(userQuery);
         if (!querySnapshot.empty) {
           const userDoc = querySnapshot.docs[0].data();
-          setUsername(userDoc.username);
           setFullName(userDoc.fullName);
           setProfilePicture(userDoc.profilePicture);
 
           await AsyncStorage.setItem('userDetails', JSON.stringify({
-            username: userDoc.username,
             email: userDoc.email,
             fullName: userDoc.fullName,
             profilePicture: userDoc.profilePicture

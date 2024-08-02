@@ -8,7 +8,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ProfileScreen() {
   const [fullName, setFullName] = useState('');
-  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [profilePicture, setProfilePicture] = useState('');
   const [loading, setLoading] = useState(true);
@@ -82,7 +81,6 @@ export default function ProfileScreen() {
           )}
           <Text style={styles.details}>Full Name: {fullName}</Text>
           <Text style={styles.details}>Email: {email}</Text>
-          <Text style={styles.details}>Username: {username}</Text>
         </View>
         <View style={styles.logoutWrapper}>
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>

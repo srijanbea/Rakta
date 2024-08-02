@@ -3,22 +3,21 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert,
 import { useNavigation } from 'expo-router';
 import { auth, db, storage } from '../firebaseConfig';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+import { collection, addDoc } from 'firebase/firestore';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export default function SignUpScreen() {
     const [fullName, setFullName] = useState('');
-    const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [imageUri, setImageUri] = useState(null);
+    const [focusedInput, setFocusedInput] = useState(null);
     const navigation = useNavigation();
 
-    // Request permission for image picker
     React.useEffect(() => {
         (async () => {
             const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -36,10 +35,7 @@ export default function SignUpScreen() {
             quality: 1,
         });
     
-        console.log('ImagePicker result:', result); // Log the entire result object
-    
         if (!result.canceled && result.assets && result.assets.length > 0) {
-            console.log('Image picked:', result.assets[0].uri); // Log the image URI from assets
             setImageUri(result.assets[0].uri);
         } else {
             console.log('Image selection canceled or no assets found');
@@ -55,15 +51,6 @@ export default function SignUpScreen() {
         setLoading(true);
 
         try {
-            const usersRef = collection(db, 'users');
-            const q = query(usersRef, where('username', '==', username));
-            const querySnapshot = await getDocs(q);
-
-            if (!querySnapshot.empty) {
-                Alert.alert('Error', 'Username is already taken');
-                return;
-            }
-
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
@@ -74,13 +61,11 @@ export default function SignUpScreen() {
                 const imageRef = ref(storage, `profilePictures/${user.uid}`);
                 await uploadBytes(imageRef, blob);
                 profilePictureUrl = await getDownloadURL(imageRef);
-                console.log('Profile picture URL:', profilePictureUrl); // Log the image URL
             }
 
             await addDoc(collection(db, 'users'), {
                 uid: user.uid,
                 fullName: fullName,
-                username: username,
                 email: email,
                 profilePicture: profilePictureUrl,
             });
@@ -92,7 +77,7 @@ export default function SignUpScreen() {
                 { cancelable: false }
             );
         } catch (error) {
-            console.error('Error during registration:', error); // Log the detailed error
+            console.error('Error during registration:', error);
             const errorCode = error.code;
             if (errorCode === 'auth/email-already-in-use') {
                 Alert.alert('Error', 'Email is already in use');
@@ -104,6 +89,19 @@ export default function SignUpScreen() {
         }
     };
 
+    const getInputContainerStyle = (inputName) => ({
+        ...styles.inputContainer,
+        borderColor: focusedInput === inputName ? 'transparent' : '#f0f0f0',
+        backgroundColor: focusedInput === inputName ? '#e6f0ff' : '#f0f0f0',
+    });
+
+    const getIconStyle = (inputName) => ({
+        ...styles.icon,
+        color: focusedInput === inputName ? '#004aad' : '#aaa',
+    });
+
+    const getPlaceholderTextColor = (inputName) => focusedInput === inputName ? '#004aad' : '#aaa';
+
     return (
         <SafeAreaView style={styles.safeArea}>
             <KeyboardAvoidingView
@@ -112,93 +110,89 @@ export default function SignUpScreen() {
                 keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
             >
                 <ScrollView contentContainerStyle={styles.scrollView}>
-                    {loading ? (
-                        <View style={styles.loadingContainer}>
-                            <ActivityIndicator size="large" color="#004aad" />
+                    <Text style={styles.heading}>Register</Text>
+                    <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
+                        {imageUri ? (
+                            <Image source={{ uri: imageUri }} style={styles.image} />
+                        ) : (
+                            <View style={styles.imagePlaceholder}>
+                                <Ionicons name="add-circle" size={30} color="#aaa" />
+                                <Text style={styles.uploadText}>Profile Picture</Text>
+                            </View>
+                        )}
+                    </TouchableOpacity>
+                    <View style={styles.form}>
+                        <View style={getInputContainerStyle('fullName')}>
+                            <Ionicons name="person-outline" size={20} style={getIconStyle('fullName')} />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Full Name"
+                                value={fullName}
+                                onChangeText={setFullName}
+                                placeholderTextColor={getPlaceholderTextColor('fullName')}
+                                onFocus={() => setFocusedInput('fullName')}
+                                onBlur={() => setFocusedInput(null)}
+                            />
                         </View>
-                    ) : (
-                        <>
-                            <Text style={styles.heading}>Register</Text>
-                            <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
-                                {imageUri ? (
-                                    <Image source={{ uri: imageUri }} style={styles.image} />
-                                ) : (
-                                    <View style={styles.imagePlaceholder}>
-                                        <Ionicons name="add-circle" size={30} color="#aaa" />
-                                        <Text style={styles.uploadText}>Profile Picture</Text>
-                                    </View>
-                                )}
-                            </TouchableOpacity>
-                            <View style={styles.form}>
-                                <View style={styles.inputContainer}>
-                                    <Ionicons name="person-outline" size={20} color="#aaa" style={styles.icon} />
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="Full Name"
-                                        value={fullName}
-                                        onChangeText={setFullName}
-                                        placeholderTextColor="#aaa"
-                                    />
-                                </View>
-                                <View style={styles.inputContainer}>
-                                    <Ionicons name="mail-outline" size={20} color="#aaa" style={styles.icon} />
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="Email"
-                                        value={email}
-                                        onChangeText={setEmail}
-                                        keyboardType="email-address"
-                                        autoCapitalize="none"
-                                        placeholderTextColor="#aaa"
-                                    />
-                                </View>
-                                <View style={styles.inputContainer}>
-                                    <Ionicons name="person-outline" size={20} color="#aaa" style={styles.icon} />
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="Username"
-                                        value={username}
-                                        onChangeText={setUsername}
-                                        placeholderTextColor="#aaa"
-                                    />
-                                </View>
-                                <View style={styles.inputContainer}>
-                                    <Ionicons name="lock-closed-outline" size={20} color="#aaa" style={styles.icon} />
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="Password"
-                                        value={password}
-                                        onChangeText={setPassword}
-                                        secureTextEntry
-                                        autoCapitalize="none"
-                                        placeholderTextColor="#aaa"
-                                    />
-                                </View>
-                                <View style={styles.inputContainer}>
-                                    <Ionicons name="lock-closed-outline" size={20} color="#aaa" style={styles.icon} />
-                                    <TextInput
-                                        style={styles.input}
-                                        placeholder="Confirm Password"
-                                        value={confirmPassword}
-                                        onChangeText={setConfirmPassword}
-                                        secureTextEntry
-                                        autoCapitalize="none"
-                                        placeholderTextColor="#aaa"
-                                    />
-                                </View>
-                                <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
-                                    <Text style={styles.signUpButtonText}>Sign Up</Text>
-                                </TouchableOpacity>
-                            </View>
-                            <View style={styles.loginContainer}>
-                                <Text style={styles.loginText}>Already have an account? </Text>
-                                <TouchableOpacity onPress={() => navigation.navigate('login')}>
-                                    <Text style={styles.loginButton}>Login</Text>
-                                </TouchableOpacity>
-                            </View>
-                        </>
-                    )}
+                        <View style={getInputContainerStyle('email')}>
+                            <Ionicons name="mail-outline" size={20} style={getIconStyle('email')} />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Email"
+                                value={email}
+                                onChangeText={setEmail}
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                                placeholderTextColor={getPlaceholderTextColor('email')}
+                                onFocus={() => setFocusedInput('email')}
+                                onBlur={() => setFocusedInput(null)}
+                            />
+                        </View>
+                        <View style={getInputContainerStyle('password')}>
+                            <Ionicons name="lock-closed-outline" size={20} style={getIconStyle('password')} />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Password"
+                                value={password}
+                                onChangeText={setPassword}
+                                secureTextEntry
+                                autoCapitalize="none"
+                                placeholderTextColor={getPlaceholderTextColor('password')}
+                                onFocus={() => setFocusedInput('password')}
+                                onBlur={() => setFocusedInput(null)}
+                            />
+                        </View>
+                        <View style={getInputContainerStyle('confirmPassword')}>
+                            <Ionicons name="lock-closed-outline" size={20} style={getIconStyle('confirmPassword')} />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Confirm Password"
+                                value={confirmPassword}
+                                onChangeText={setConfirmPassword}
+                                secureTextEntry
+                                autoCapitalize="none"
+                                placeholderTextColor={getPlaceholderTextColor('confirmPassword')}
+                                onFocus={() => setFocusedInput('confirmPassword')}
+                                onBlur={() => setFocusedInput(null)}
+                            />
+                        </View>
+                        <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
+                            <Text style={styles.signUpButtonText}>Sign Up</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.loginContainer}>
+                        <Text style={styles.loginText}>Already have an account? </Text>
+                        <TouchableOpacity onPress={() => navigation.navigate('login')}>
+                            <Text style={styles.loginButton}>Login</Text>
+                        </TouchableOpacity>
+                    </View>
                 </ScrollView>
+                {loading && (
+                    <View style={styles.overlay}>
+                        <ActivityIndicator size="large" color="#004aad" />
+                        <Text style={styles.loadingText}>Please wait...</Text>
+                    </View>
+                )}
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
@@ -225,9 +219,9 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     imagePicker: {
-        width: 120, // Adjust size as needed
-        height: 120, // Adjust size as needed
-        borderRadius: 60, // Circular border radius
+        width: 120,
+        height: 120,
+        borderRadius: 60,
         backgroundColor: '#e0e0e0',
         alignItems: 'center',
         justifyContent: 'center',
@@ -252,19 +246,20 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 10,
         color: '#aaa'
-
     },
-
     form: {
         width: '100%',
     },
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
+        borderColor: '#f0f0f0',
         backgroundColor: '#f0f0f0',
         borderRadius: 25,
         paddingHorizontal: 20,
         marginBottom: 20,
+        borderWidth: 1,
+        height: 50
     },
     icon: {
         marginRight: 10,
@@ -273,6 +268,7 @@ const styles = StyleSheet.create({
         flex: 1,
         height: 50,
         fontSize: 16,
+        paddingHorizontal: 10,
     },
     signUpButton: {
         backgroundColor: '#004aad',
@@ -282,25 +278,30 @@ const styles = StyleSheet.create({
     },
     signUpButtonText: {
         color: '#fff',
-        fontSize: 18,
         fontWeight: 'bold',
+        fontSize: 18,
     },
     loginContainer: {
-        marginTop: 20,
         flexDirection: 'row',
-        alignItems: 'center',
+        marginTop: 20,
     },
     loginText: {
-        color: '#333',
+        fontSize: 16,
     },
     loginButton: {
         color: '#004aad',
         fontWeight: 'bold',
+        fontSize: 16,
     },
-    loadingContainer: {
-        flex: 1,
+    overlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#fff',
+    },
+    loadingText: {
+        marginTop: 10,
+        fontSize: 16,
+        color: '#004aad',
     },
 });
