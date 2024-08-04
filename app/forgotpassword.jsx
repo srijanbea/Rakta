@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
 import { useNavigation } from 'expo-router';
 
-export default function DashboardScreen() {
+export default function ForgotPasswordScreen() {
   const navigation = useNavigation();
 
   const navigateToLoginScreen = () => {
@@ -11,7 +11,7 @@ export default function DashboardScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Password Recovery Screen</Text>
+      <Text style={styles.heading}>Forgot Password</Text>
       <Button title="Back to login" onPress={navigateToLoginScreen} />
     </View>
   );

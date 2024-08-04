@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, KeyboardAvoidingView, Platform, SafeAreaView, ActivityIndicator, Image } from 'react-native';
 import { useNavigation } from 'expo-router';
-import { auth, db, storage } from '../firebaseConfig';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { auth, db } from '../firebaseconfig';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { collection, addDoc } from 'firebase/firestore';
-import { Ionicons } from '@expo/vector-icons';
-import * as ImagePicker from 'expo-image-picker';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export default function SignUpScreen() {
     const [fullName, setFullName] = useState('');
@@ -14,80 +12,83 @@ export default function SignUpScreen() {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const [imageUri, setImageUri] = useState(null);
     const [focusedInput, setFocusedInput] = useState(null);
+    const [error, setError] = useState({});
     const navigation = useNavigation();
 
-    React.useEffect(() => {
-        (async () => {
-            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-            if (status !== 'granted') {
-                Alert.alert('Permission required', 'We need permission to access your gallery to pick a profile picture.');
-            }
-        })();
-    }, []);
 
-    const pickImage = async () => {
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [4, 3],
-            quality: 1,
-        });
-    
-        if (!result.canceled && result.assets && result.assets.length > 0) {
-            setImageUri(result.assets[0].uri);
-        } else {
-            console.log('Image selection canceled or no assets found');
-        }
+    const isValidEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    const isValidPassword = (password) => {
+        const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*.,:;])[A-Za-z\d!@#$%^&*.,:;]{8,}$/;
+        return passwordRegex.test(password);
     };
 
     const handleSignUp = async () => {
-        if (password !== confirmPassword) {
-            Alert.alert('Error', 'Passwords do not match');
-            return;
+        const newError = {};
+
+        if (!fullName) {
+            newError.fullName = 'This field is required';
         }
 
-        setLoading(true);
+        if (!email) {
+            newError.email = 'This field is required';
+        } else if (!isValidEmail(email)) {
+            newError.email = 'Invalid email';
+        }
 
-        try {
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
+        if (!password) {
+            newError.password = 'This field is required';
+        } else if (!isValidPassword(password)) {
+            newError.password = 'Password must be at least 8 characters long, contain one uppercase letter, one number, and one special character';
+        }
 
-            let profilePictureUrl = '';
-            if (imageUri) {
-                const response = await fetch(imageUri);
-                const blob = await response.blob();
-                const imageRef = ref(storage, `profilePictures/${user.uid}`);
-                await uploadBytes(imageRef, blob);
-                profilePictureUrl = await getDownloadURL(imageRef);
+        if (!confirmPassword) {
+            newError.confirmPassword = 'This field is required';
+        } else if (password && confirmPassword !== password) {
+            newError.confirmPassword = 'Passwords do not match';
+        }
+
+        setError(newError);
+
+        if (Object.keys(newError).length === 0) {
+            setLoading(true);
+
+            try {
+                // Create a new user with email and password
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                // Store full name and email in Firestore
+                const user = userCredential.user;
+                await addDoc(collection(db, 'users'), {
+                    uid: user.uid,
+                    fullName: fullName,
+                    email: email,
+                    profilePicture: '',
+                });
+
+                Alert.alert(
+                    'Registration Successful',
+                    'Your account has been created successfully.',
+                    [{ text: 'OK', onPress: () => navigation.navigate('login') }],
+                    { cancelable: false }
+                );
+            } catch (error) {
+                const errorCode = error.code;
+                if (errorCode === 'auth/email-already-in-use') {
+                    newError.email = 'Email is already in use'
+                }
+                else {
+                    console.log('Error', error.message);
+                }
+            } finally {
+                setLoading(false);
             }
-
-            await addDoc(collection(db, 'users'), {
-                uid: user.uid,
-                fullName: fullName,
-                email: email,
-                profilePicture: profilePictureUrl,
-            });
-
-            Alert.alert(
-                'Registration Successful',
-                'Your account has been created successfully.',
-                [{ text: 'OK', onPress: () => navigation.navigate('login') }],
-                { cancelable: false }
-            );
-        } catch (error) {
-            console.error('Error during registration:', error);
-            const errorCode = error.code;
-            if (errorCode === 'auth/email-already-in-use') {
-                Alert.alert('Error', 'Email is already in use');
-            } else {
-                Alert.alert('Error', 'An error occurred during registration');
-            }
-        } finally {
-            setLoading(false);
         }
     };
+
 
     const getInputContainerStyle = (inputName) => ({
         ...styles.inputContainer,
@@ -107,78 +108,91 @@ export default function SignUpScreen() {
             <KeyboardAvoidingView
                 style={styles.container}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+                // keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
             >
                 <ScrollView contentContainerStyle={styles.scrollView}>
                     <Text style={styles.heading}>Register</Text>
-                    <TouchableOpacity onPress={pickImage} style={styles.imagePicker}>
-                        {imageUri ? (
-                            <Image source={{ uri: imageUri }} style={styles.image} />
-                        ) : (
-                            <View style={styles.imagePlaceholder}>
-                                <Ionicons name="add-circle" size={30} color="#aaa" />
-                                <Text style={styles.uploadText}>Profile Picture</Text>
-                            </View>
-                        )}
-                    </TouchableOpacity>
                     <View style={styles.form}>
-                        <View style={getInputContainerStyle('fullName')}>
-                            <Ionicons name="person-outline" size={20} style={getIconStyle('fullName')} />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Full Name"
-                                value={fullName}
-                                onChangeText={setFullName}
-                                placeholderTextColor={getPlaceholderTextColor('fullName')}
-                                onFocus={() => setFocusedInput('fullName')}
-                                onBlur={() => setFocusedInput(null)}
-                            />
+                        
+                        <View style={styles.fieldWrapper}>
+                            <View style={getInputContainerStyle('fullName')}>
+                                <Icon name="person-outline" size={20} style={getIconStyle('fullName')} />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Full Name"
+                                    value={fullName}
+                                    onChangeText={setFullName}
+                                    placeholderTextColor={getPlaceholderTextColor('fullName')}
+                                    onFocus={() => setFocusedInput('fullName')}
+                                    onBlur={() => setFocusedInput(null)}
+                                />
+                            </View>
+                            {error.fullName && <Text style={styles.errorText}>{error.fullName}</Text>}
                         </View>
-                        <View style={getInputContainerStyle('email')}>
-                            <Ionicons name="mail-outline" size={20} style={getIconStyle('email')} />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Email"
-                                value={email}
-                                onChangeText={setEmail}
-                                keyboardType="email-address"
-                                autoCapitalize="none"
-                                placeholderTextColor={getPlaceholderTextColor('email')}
-                                onFocus={() => setFocusedInput('email')}
-                                onBlur={() => setFocusedInput(null)}
-                            />
+
+                        <View style={styles.fieldWrapper}>
+                            <View style={getInputContainerStyle('email')}>
+                                <Icon name="mail-outline" size={20} style={getIconStyle('email')} />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Email"
+                                    value={email}
+                                    onChangeText={setEmail}
+                                    keyboardType="email-address"
+                                    autoCapitalize="none"
+                                    placeholderTextColor={getPlaceholderTextColor('email')}
+                                    onFocus={() => setFocusedInput('email')}
+                                    onBlur={() => setFocusedInput(null)}
+                                />
+                            </View>
+                            {error.email && <Text style={styles.errorText}>{error.email}</Text>}
                         </View>
-                        <View style={getInputContainerStyle('password')}>
-                            <Ionicons name="lock-closed-outline" size={20} style={getIconStyle('password')} />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Password"
-                                value={password}
-                                onChangeText={setPassword}
-                                secureTextEntry
-                                autoCapitalize="none"
-                                placeholderTextColor={getPlaceholderTextColor('password')}
-                                onFocus={() => setFocusedInput('password')}
-                                onBlur={() => setFocusedInput(null)}
-                            />
+                        
+                        <View style={styles.fieldWrapper}>
+                            <View style={getInputContainerStyle('password')}>
+                                <Icon name="lock-outline" size={20} style={getIconStyle('password')} />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Password"
+                                    value={password}
+                                    onChangeText={setPassword}
+                                    secureTextEntry
+                                    autoCapitalize="none"
+                                    placeholderTextColor={getPlaceholderTextColor('password')}
+                                    onFocus={() => setFocusedInput('password')}
+                                    onBlur={() => setFocusedInput(null)}
+                                />
+                            </View>
+                            {error.password && <Text style={styles.errorText}>{error.password}</Text>}
                         </View>
-                        <View style={getInputContainerStyle('confirmPassword')}>
-                            <Ionicons name="lock-closed-outline" size={20} style={getIconStyle('confirmPassword')} />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Confirm Password"
-                                value={confirmPassword}
-                                onChangeText={setConfirmPassword}
-                                secureTextEntry
-                                autoCapitalize="none"
-                                placeholderTextColor={getPlaceholderTextColor('confirmPassword')}
-                                onFocus={() => setFocusedInput('confirmPassword')}
-                                onBlur={() => setFocusedInput(null)}
-                            />
+                        
+                        <View style={styles.fieldWrapper}>
+                            <View style={getInputContainerStyle('confirmPassword')}>
+                                <Icon name="lock-outline" size={20} style={getIconStyle('confirmPassword')} />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Confirm Password"
+                                    value={confirmPassword}
+                                    onChangeText={setConfirmPassword}
+                                    secureTextEntry
+                                    autoCapitalize="none"
+                                    placeholderTextColor={getPlaceholderTextColor('confirmPassword')}
+                                    onFocus={() => setFocusedInput('confirmPassword')}
+                                    onBlur={() => setFocusedInput(null)}
+                                />
+                            </View>
+                            {error.confirmPassword && <Text style={styles.errorText}>{error.confirmPassword}</Text>}
                         </View>
-                        <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp}>
+                        <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp} disabled={loading}>
                             <Text style={styles.signUpButtonText}>Sign Up</Text>
                         </TouchableOpacity>
+                        <TouchableOpacity style={styles.signUpWithGoogleButton} disabled={loading}>
+                            <View style={styles.googleButtonContent}>
+                                <Image source={require('../assets/images/google-icon-small.png')} style={styles.googleLogo} />
+                                <Text style={styles.signUpWithGoogleButtonText}>Sign Up With Google</Text>
+                            </View>
+                        </TouchableOpacity>
+
                     </View>
                     <View style={styles.loginContainer}>
                         <Text style={styles.loginText}>Already have an account? </Text>
@@ -210,7 +224,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#fff',
-        padding: 20,
+        paddingLeft: 20,
+        paddingRight: 20,
+        paddingTop: 10,
+        paddingBottom: 10,
     },
     heading: {
         fontSize: 30,
@@ -218,37 +235,11 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         fontWeight: 'bold',
     },
-    imagePicker: {
-        width: 120,
-        height: 120,
-        borderRadius: 60,
-        backgroundColor: '#e0e0e0',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 20,
-        borderColor: '#004aad',
-        borderWidth: 4,
-        overflow: 'hidden',
-    },
-    image: {
-        width: '100%',
-        height: '100%',
-        borderRadius: 60,
-    },
-    imagePlaceholder: {
-        width: '100%',
-        height: '100%',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    uploadText: {
-        marginTop: 10,
-        fontWeight: 'bold',
-        fontSize: 10,
-        color: '#aaa'
-    },
     form: {
         width: '100%',
+    },
+    fieldWrapper: {
+        marginBottom: 15, // Space between fields
     },
     inputContainer: {
         flexDirection: 'row',
@@ -257,9 +248,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#f0f0f0',
         borderRadius: 25,
         paddingHorizontal: 20,
-        marginBottom: 20,
         borderWidth: 1,
-        height: 50
+        height: 50,
     },
     icon: {
         marginRight: 10,
@@ -270,38 +260,79 @@ const styles = StyleSheet.create({
         fontSize: 16,
         paddingHorizontal: 10,
     },
+    errorText: {
+        color: 'red',
+        marginTop: 5, // Small margin for error text
+        marginLeft: 10,
+    },
     signUpButton: {
         backgroundColor: '#004aad',
         paddingVertical: 15,
         borderRadius: 25,
         alignItems: 'center',
+        marginVertical: 10,
+        width: '100%', // Ensures the button takes full width
+        justifyContent: 'center',
+        height: 55,
     },
     signUpButtonText: {
         color: '#fff',
         fontWeight: 'bold',
-        fontSize: 18,
+        fontSize: 16,
     },
+
+    signUpWithGoogleButton: {
+        backgroundColor: '#fff',
+        paddingVertical: 15,
+        borderWidth: 1,
+        borderColor: "#004aad",
+        borderRadius: 25,
+        alignItems: 'center',
+        marginVertical: 10,
+        width: '100%', // Ensures the button takes full width
+        flexDirection: 'row', // Aligns children in a row
+        justifyContent: 'center', // Centers content horizontally
+        height: 55,
+    },
+    googleButtonContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        width: '100%', // Ensures the content takes full width
+        paddingHorizontal: 20,
+        justifyContent: 'center',
+    },
+    googleLogo: {
+        width: 24,
+        height: 24,
+        marginRight: 10,
+    },
+    signUpWithGoogleButtonText: {
+        color: '#004aad',
+        fontWeight: 'bold',
+        fontSize: 16,
+        textAlign: 'center',
+    },
+    
     loginContainer: {
         flexDirection: 'row',
         marginTop: 20,
     },
-    loginText: {
-        fontSize: 16,
-    },
     loginButton: {
         color: '#004aad',
         fontWeight: 'bold',
-        fontSize: 16,
     },
     overlay: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
         justifyContent: 'center',
         alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     loadingText: {
-        marginTop: 10,
-        fontSize: 16,
         color: '#004aad',
+        marginTop: 10,
     },
 });

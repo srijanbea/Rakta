@@ -1,15 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, Platform, StatusBar, TouchableOpacity } from 'react-native';
-import { useNavigation } from 'expo-router';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import BottomNavBar from './bottomnavbar'; // Adjust the path as needed
+import { View, Text, StyleSheet } from 'react-native';
 
-export default function BloodBanksScreen() {
-  const navigation = useNavigation();
-
-  const navigateToNotifications = () => {
-    navigation.navigate('notifications'); // Make sure this is the correct route name for the Notifications
-  };
+export default function DonationHistoryScreen() {
 
   return (
     <View style={styles.container}>

@@ -1,42 +1,63 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, Alert, KeyboardAvoidingView, Platform, SafeAreaView, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, ActivityIndicator, Alert } from 'react-native';
 import { useNavigation } from 'expo-router';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { auth, db } from '../firebaseconfig';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebaseConfig'; // Adjust the path to your firebaseConfig
-import { Ionicons } from '@expo/vector-icons'; // Import Ionicons for icon usage
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [focusedInput, setFocusedInput] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState({});
     const navigation = useNavigation();
 
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            setError({});
+        });
+        return unsubscribe;
+    }, [navigation]);
+
+
     const handleLogin = async () => {
-        setLoading(true); // Show loading indicator
+        const newError = {};
 
-        try {
-            // Authenticate the user with Firebase
-            await signInWithEmailAndPassword(auth, email, password);
+        if (!email) {
+            newError.email = 'This field is required';
+        }
 
-            // If successful, navigate to Dashboard
-            navigation.reset({
-                index: 0,
-                routes: [{ name: 'dashboard' }],
-            });
-        } catch (error) {
-            // Handle Firebase authentication errors
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            if (errorCode === 'auth/invalid-credential') {
-                Alert.alert('Invalid Credentials');
-                setPassword('');
+        if (!password) {
+            newError.password = 'This field is required';
+        }
+
+        setError(newError);
+
+        if (Object.keys(newError).length === 0) {
+            setLoading(true);
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'dashboard' }],
+                });
+            } catch (error) {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                if (errorCode === 'auth/invalid-credential') {
+                    setPassword('');
+                    newError.password = 'Invalid Credentials';
+                } else {
+                    Alert.alert('Error', errorMessage);
+                }
+                setError(newError);
+            } finally {
+                setLoading(false);
             }
-            console.log(errorMessage);
-        } finally {
-            setLoading(false); // Hide loading indicator
         }
     };
+
     const getInputContainerStyle = (inputName) => ({
         ...styles.inputContainer,
         borderColor: focusedInput === inputName ? 'transparent' : '#f0f0f0',
@@ -62,36 +83,50 @@ export default function LoginScreen() {
                     </View>
                     <Text style={styles.welcomeText}>Welcome</Text>
                     <View style={styles.form}>
-                    <View style={getInputContainerStyle('email')}>
-                            <Ionicons name="mail-outline" size={20} style={getIconStyle('email')} />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Email"
-                                value={email}
-                                onChangeText={setEmail}
-                                keyboardType="email-address"
-                                autoCapitalize="none"
-                                placeholderTextColor={getPlaceholderTextColor('email')}
-                                onFocus={() => setFocusedInput('email')}
-                                onBlur={() => setFocusedInput(null)}
-                            />
+                        <View style={styles.fieldWrapper}>
+                            <View style={getInputContainerStyle('email')}>
+                                <Icon name="mail-outline" size={20} style={getIconStyle('email')} />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Email"
+                                    value={email}
+                                    onChangeText={setEmail}
+                                    keyboardType="email-address"
+                                    autoCapitalize="none"
+                                    placeholderTextColor={getPlaceholderTextColor('email')}
+                                    onFocus={() => setFocusedInput('email')}
+                                    onBlur={() => setFocusedInput(null)}
+                                />
+                            </View>
+                            {error.email && <Text style={styles.errorText}>{error.email}</Text>}
                         </View>
-                        <View style={getInputContainerStyle('password')}>
-                            <Ionicons name="lock-closed-outline" size={20} style={getIconStyle('password')} />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Password"
-                                value={password}
-                                onChangeText={setPassword}
-                                secureTextEntry
-                                autoCapitalize="none"
-                                placeholderTextColor={getPlaceholderTextColor('password')}
-                                onFocus={() => setFocusedInput('password')}
-                                onBlur={() => setFocusedInput(null)}
-                            />
+
+                        <View style={styles.fieldWrapper}>
+                            <View style={getInputContainerStyle('password')}>
+                                <Icon name="lock-outline" size={20} style={getIconStyle('password')} />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Password"
+                                    value={password}
+                                    onChangeText={setPassword}
+                                    secureTextEntry
+                                    autoCapitalize="none"
+                                    placeholderTextColor={getPlaceholderTextColor('password')}
+                                    onFocus={() => setFocusedInput('password')}
+                                    onBlur={() => setFocusedInput(null)}
+                                />
+                            </View>
+                            {error.password && <Text style={styles.errorText}>{error.password}</Text>}
                         </View>
+
                         <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={loading}>
                             <Text style={styles.loginButtonText}>Login</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.signInWithGoogleButton} disabled={loading}>
+                            <View style={styles.googleButtonContent}>
+                                <Image source={require('../assets/images/google-icon-small.png')} style={styles.googleLogo} />
+                                <Text style={styles.signInWithGoogleButtonText}>Continue With Google</Text>
+                            </View>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => navigation.navigate('forgotpassword')}>
                             <Text style={styles.forgotPassword}>Forgot Password?</Text>
@@ -104,13 +139,13 @@ export default function LoginScreen() {
                         </TouchableOpacity>
                     </View>
                 </ScrollView>
+                {loading && (
+                    <View style={styles.overlay}>
+                        <ActivityIndicator size="large" color="#004aad" />
+                        <Text style={styles.loadingText}>Please wait...</Text>
+                    </View>
+                )}
             </KeyboardAvoidingView>
-            {loading && (
-                <View style={styles.overlay}>
-                    <ActivityIndicator size="large" color="#004aad" />
-                    <Text style={styles.loadingText}>Please wait...</Text>
-                </View>
-            )}
         </SafeAreaView>
     );
 }
@@ -127,17 +162,20 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#fff',
-        padding: 20,
+        paddingLeft: 20,
+        paddingRight: 20,
+        paddingTop: 10,
+        paddingBottom: 10,
     },
     logoContainer: {
-        marginBottom: 70,
-        width: '100%', // Ensure the logo container takes full width
-        alignItems: 'center', // Center the logo horizontally
+        marginBottom: 50,
+        width: '100%',
+        alignItems: 'center',
     },
     logo: {
-        width: '100%', // Ensure the logo takes full width of its container
-        height: undefined, // Let the height adjust based on the aspect ratio
-        aspectRatio: 2, // Adjust this if needed, e.g., 1 for square, or the actual aspect ratio of your image
+        width: '90%',
+        height: undefined,
+        aspectRatio: 2,
     },
     welcomeText: {
         fontSize: 30,
@@ -147,16 +185,20 @@ const styles = StyleSheet.create({
     },
     form: {
         width: '100%',
+        marginBottom: 100,
+    },
+    fieldWrapper: {
+        marginBottom: 15,
     },
     inputContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        height: 50,
+        borderColor: '#f0f0f0',
         backgroundColor: '#f0f0f0',
         borderRadius: 25,
         paddingHorizontal: 20,
-        marginBottom: 20,
-        fontSize: 16,
+        borderWidth: 1,
+        height: 50,
     },
     input: {
         flex: 1,
@@ -164,50 +206,88 @@ const styles = StyleSheet.create({
         fontSize: 16,
         paddingHorizontal: 10,
     },
-    
+    errorText: {
+        color: 'red',
+        marginTop: 5,
+        marginLeft: 10,
+    },
     icon: {
         marginRight: 10,
     },
-
     loginButton: {
         backgroundColor: '#004aad',
         paddingVertical: 15,
         borderRadius: 25,
         alignItems: 'center',
-        marginBottom: 20,
+        marginVertical: 10,
+        height: 55,
+        justifyContent: 'center'
     },
     loginButtonText: {
         color: '#fff',
-        fontSize: 18,
+        fontSize: 16,
         fontWeight: 'bold',
     },
+    signInWithGoogleButton: {
+        backgroundColor: '#fff',
+        paddingVertical: 15,
+        borderWidth: 1,
+        borderColor: "#004aad",
+        borderRadius: 25,
+        alignItems: 'center',
+        marginVertical: 10,
+        width: '100%', // Ensures the button takes full width
+        flexDirection: 'row', // Aligns children in a row
+        justifyContent: 'center', // Centers content horizontally
+        height: 55,
+    },
+    googleButtonContent: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        width: '100%', // Ensures the content takes full width
+        paddingHorizontal: 20,
+        justifyContent: 'center',
+    },
+    googleLogo: {
+        width: 24,
+        height: 24,
+        marginRight: 10,
+    },
+    signInWithGoogleButtonText: {
+        color: '#004aad',
+        fontWeight: 'bold',
+        fontSize: 16,
+        textAlign: 'center',
+    },
     forgotPassword: {
+        marginTop: 5,
         color: '#004aad',
         textAlign: 'center',
     },
     signupContainer: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
     },
     signupText: {
-        marginTop: 130,
         color: '#333',
     },
     signupButton: {
-        marginTop: 130,
         color: '#004aad',
         fontWeight: 'bold',
     },
     overlay: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'center',
         alignItems: 'center',
-        zIndex: 1000,
     },
     loadingText: {
-        marginTop: 10,
         color: '#004aad',
-        fontSize: 16,
+        marginTop: 10,
     },
 });

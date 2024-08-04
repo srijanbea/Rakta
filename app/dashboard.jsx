@@ -2,11 +2,11 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Alert, Platform, StatusBar, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
 import { useNavigation } from 'expo-router';
 import { getAuth } from 'firebase/auth';
-import { getFirestore, collection, query, where, onSnapshot, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { LineChart } from 'react-native-chart-kit';
-import BottomNavBar from './bottomnavbar'; // Adjust the path as needed
+import BottomNavBar from './bottomnavbar';
 import { Dimensions } from 'react-native';
 import { format } from 'date-fns';
 
@@ -15,7 +15,6 @@ const screenWidth = Dimensions.get('window').width;
 export default function DashboardScreen() {
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
-  const [profilePicture, setProfilePicture] = useState('');
   const [chartData, setChartData] = useState({ labels: [], datasets: [{ data: [] }] });
   const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation();
@@ -39,73 +38,97 @@ export default function DashboardScreen() {
         if (!querySnapshot.empty) {
           const userDoc = querySnapshot.docs[0].data();
           setFullName(userDoc.fullName);
-          setProfilePicture(userDoc.profilePicture);
 
           await AsyncStorage.setItem('userDetails', JSON.stringify({
             email: userDoc.email,
             fullName: userDoc.fullName,
-            profilePicture: userDoc.profilePicture
           }));
         } else {
           console.log('No such document!');
         }
       } catch (error) {
-        console.error('Error fetching user details:', error);
-        Alert.alert('Error', 'Failed to load user details.');
+        console.log('Error fetching user details:', error);
       }
     } else {
-      Alert.alert('Error', 'No user is logged in.');
+      console.log('Error', 'No user is logged in.');
     }
   }, [auth, firestore]);
 
   const fetchLiveData = useCallback(async () => {
     const today = new Date();
-    const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
-
-    const q = query(collection(firestore, 'rakta_usage'), where('date', '>=', startOfWeek));
-    
+    const startOfRange = new Date(today);
+    startOfRange.setDate(startOfRange.getDate() - 4); // 4 days before today
+  
+    const endOfRange = new Date(today); // Up to today
+  
+    // Query only for past and present dates
+    const q = query(
+      collection(firestore, 'rakta_usage'),
+      where('date', '>=', startOfRange),
+      where('date', '<=', endOfRange)
+    );
+  
     try {
       const snapshot = await getDocs(q);
+      console.log('Snapshot Size:', snapshot.size);
+  
       const labels = [];
-      const data = [];
-      
+      const dataMap = {}; // Use a map to avoid duplicates
+  
+      // Initialize labels and data map for 4 past days, today, and 2 future days
+      for (let i = 4; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const formattedDate = `${date.getDate()}/${date.getMonth() + 1}`;
+        labels.push(formattedDate);
+        dataMap[formattedDate] = 0; // Initialize with 0
+      }
+  
+      labels.push(`${today.getDate()}/${today.getMonth() + 1}`); // Add today
+      dataMap[`${today.getDate()}/${today.getMonth() + 1}`] = 0; // Initialize with 0 for today
+  
+      for (let i = 1; i <= 2; i++) {
+        const futureDate = new Date(today);
+        futureDate.setDate(futureDate.getDate() + i);
+        const formattedDate = `${futureDate.getDate()}/${futureDate.getMonth() + 1}`;
+        labels.push(formattedDate);
+        dataMap[formattedDate] = 0; // Initialize with 0 for upcoming days
+      }
+  
+      // Update data with actual values from Firestore
       snapshot.forEach(doc => {
         const dataPoint = doc.data();
-        
         if (dataPoint && dataPoint.date && dataPoint.blood_donation_count !== undefined) {
           const date = dataPoint.date.toDate ? dataPoint.date.toDate() : new Date(dataPoint.date.seconds * 1000);
           const formattedDate = `${date.getDate()}/${date.getMonth() + 1}`;
-          
-          labels.push(formattedDate);
-          data.push(dataPoint.blood_donation_count);
+  
+          // Update dataMap only if date is in labels
+          if (dataMap.hasOwnProperty(formattedDate)) {
+            dataMap[formattedDate] = dataPoint.blood_donation_count;
+            console.log(`Updated data for ${formattedDate}:`, dataPoint.blood_donation_count);
+          }
         }
       });
-
-      // Ensure there are 7 data points with latest data centered
-      const totalPoints = 7;
-      const emptyPoints = totalPoints - labels.length;
-      const halfEmptyPoints = Math.floor(emptyPoints / 2);
-
-      const finalLabels = Array(halfEmptyPoints).fill('').concat(labels).concat(Array(totalPoints - labels.length - halfEmptyPoints).fill(''));
-      const finalData = Array(halfEmptyPoints).fill(0).concat(data).concat(Array(totalPoints - labels.length - halfEmptyPoints).fill(0));
-
+  
+      // Ensure unique labels and correct data mapping
+      const finalLabels = [...new Set(labels)];
+      const finalData = finalLabels.map(label => dataMap[label] || 0);
+  
+      console.log('Final Labels:', finalLabels);
+      console.log('Final Data:', finalData);
+  
       setChartData({
         labels: finalLabels,
-        datasets: [{
-          data: finalData,
-          strokeWidth: 2,
-        }]
+        datasets: [{ data: finalData, strokeWidth: 2 }]
       });
+  
       setLastUpdated(new Date());
     } catch (error) {
       console.error('Error fetching live data:', error);
       Alert.alert('Error', 'Failed to load live data.');
     }
   }, [firestore]);
-
-  const navigateToNotifications = () => {
-    navigation.navigate('notifications');
-  };
+  
 
   const chartConfig = {
     backgroundGradientFrom: "#ffffff",
@@ -152,8 +175,7 @@ export default function DashboardScreen() {
   
       setTotalBloodDonation(totalCount); // Ensure this updates the state
     } catch (error) {
-      console.error('Error calculating total blood donation:', error);
-      Alert.alert('Error', 'Failed to calculate total blood donation.');
+      console.log('Error calculating total blood donation:', error);
     }
   }, [firestore]);
 
@@ -174,11 +196,6 @@ export default function DashboardScreen() {
   
   return (
     <View style={styles.container}>
-      <View style={styles.titleBar}>
-        <TouchableOpacity onPress={navigateToNotifications}>
-          <Icon name="notifications" size={25} color="#fff" />
-        </TouchableOpacity>
-      </View>
       <ScrollView
         contentContainerStyle={styles.content}
         refreshControl={
@@ -254,15 +271,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f7f7f7',
     justifyContent: 'space-between',
-  },
-  titleBar: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    backgroundColor: '#004aad',
-    paddingTop: Platform.OS === 'ios' ? 40 : StatusBar.currentHeight,
-    paddingBottom: 16,
-    paddingHorizontal: 16,
   },
   content: {
     padding: 16,

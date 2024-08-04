@@ -1,13 +1,15 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet } from 'react-native';
-import { useNavigation } from 'expo-router';
+import { View, Text, StyleSheet } from 'react-native';
 
-export default function DashboardScreen() {
-  const navigation = useNavigation();
+
+export default function Notifications() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Notifications Section</Text>
+      <View style={styles.content}>
+        <Text style={styles.infoText}>Notifications Section</Text>
+        {/* Add the content for blood banks information here */}
+      </View>
     </View>
   );
 }
@@ -15,14 +17,17 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
     backgroundColor: '#f7f7f7',
+    justifyContent: 'space-between', // Ensures the bottom bar is pushed to the bottom
   },
-  heading: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 32,
+  content: {
+    flex: 1, // Takes the available space between the title bar and bottom nav
+    padding: 16,
+  },
+  infoText: {
+    fontSize: 18,
+    color: '#333',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });

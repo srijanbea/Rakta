@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Dimensions, Text, Image } from 'react-native';
+import { View, StyleSheet, Dimensions, Text, TouchableOpacity } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from 'expo-router';
 
@@ -23,33 +23,30 @@ const BottomNavBar = ({ activeScreen }) => {
   return (
     <View style={styles.container}>
       <View style={styles.iconContainer}>
-        <View style={styles.iconWrapper}>
+        <TouchableOpacity onPress={navigateToHome} style={styles.iconWrapper} accessibilityLabel="Home">
           <Icon 
             name="home" 
             size={30} 
             color={activeScreen === 'dashboard' ? "#004aad" : "#777"} 
-            onPress={navigateToHome} 
           />
           <Text style={[styles.label, { color: activeScreen === 'dashboard' ? "#004aad" : "#777" }]}>Home</Text>
-        </View>
-        <View style={styles.iconWrapper}>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={navigateToBloodBanks} style={styles.iconWrapper} accessibilityLabel="Blood Banks">
           <Icon 
             name="local-hospital" 
             size={30} 
             color={activeScreen === 'bloodbanks' ? "#004aad" : "#777"} 
-            onPress={navigateToBloodBanks} 
           />
           <Text style={[styles.label, { color: activeScreen === 'bloodbanks' ? "#004aad" : "#777" }]}>Blood Banks</Text>
-        </View>
-        <View style={styles.iconWrapper}>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={navigateToProfile} style={styles.iconWrapper} accessibilityLabel="Profile">
           <Icon 
             name="person" 
             size={30} 
             color={activeScreen === 'profile' ? "#004aad" : "#777"} 
-            onPress={navigateToProfile} 
           />
           <Text style={[styles.label, { color: activeScreen === 'profile' ? "#004aad" : "#777" }]}>Profile</Text>
-        </View>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -58,29 +55,27 @@ const BottomNavBar = ({ activeScreen }) => {
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    bottom: 0, // Ensure it's at the bottom of the screen
+    bottom: 0,
     left: 0,
     right: 0,
-    width: width, // Make the container stretch full width
-    backgroundColor: '#fff', // Background color of the nav bar
-    borderTopColor: '#ddd', // Optional border color
-    borderTopWidth: 0, // Remove border if you want a seamless look
-    borderRadius: 0, // Remove rounded corners
+    width: width,
+    backgroundColor: '#fff',
+    borderTopColor: '#ddd',
+    borderTopWidth: 0,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: -3 }, // Shadow above the bar
+    shadowOffset: { width: 0, height: -3 },
     shadowOpacity: 0.2,
     shadowRadius: 6,
-    elevation: 5, // Elevation for Android
-    paddingVertical: 9, // Space inside the nav bar
+    elevation: 5,
+    paddingVertical: 9,
     paddingHorizontal: 16,
-    alignItems: 'center', // Center the icon container horizontally
+    alignItems: 'center',
   },
   iconContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
-    width: '100%', // Stretch icons container to full width
-    marginBottom: 12,
+    width: '100%',
   },
   iconWrapper: {
     alignItems: 'center',

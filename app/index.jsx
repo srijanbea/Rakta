@@ -26,13 +26,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#004aad'
+    padding: 20,
+    backgroundColor: '#004aad',
   },
   image: {
-    width: '100%', // Ensure the image takes full width of its container
-    height: undefined, // Let the height adjust based on the aspect ratio
-    aspectRatio: 2, // Adjust this if needed, e.g., 1 for square, or the actual aspect ratio of your image
+    width: '80%',
+    height: undefined,
+    aspectRatio: 1.5,
     marginBottom: 32,
   },
   subtitle: {
@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: '#fff',
     paddingVertical: 15,
-    paddingHorizontal: 20, // Reduced paddingHorizontal to balance the content
+    paddingHorizontal: 25,
     borderRadius: 25,
     elevation: 2,
     alignItems: 'center',
@@ -56,6 +56,6 @@ const styles = StyleSheet.create({
     color: '#004aad',
     fontSize: 18,
     fontWeight: 'bold',
-    marginRight: 10, // Reduced marginRight for better alignment
+    marginRight: 10,
   },
 });

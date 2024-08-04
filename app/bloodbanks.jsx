@@ -7,17 +7,8 @@ import BottomNavBar from './bottomnavbar';
 export default function BloodBanksScreen() {
   const navigation = useNavigation();
 
-  const navigateToNotifications = () => {
-    navigation.navigate('notifications');
-  };
-
   return (
     <View style={styles.container}>
-      <View style={styles.titleBar}>
-        <TouchableOpacity onPress={navigateToNotifications}>
-          <Icon name="notifications" size={25} color="#fff" />
-        </TouchableOpacity>
-      </View>
       <View style={styles.content}>
         <Text style={styles.infoText}>Blood Banks Section</Text>
         {/* Add the content for blood banks information here */}
@@ -32,15 +23,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f7f7f7',
     justifyContent: 'space-between', // Ensures the bottom bar is pushed to the bottom
-  },
-  titleBar: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    backgroundColor: '#004aad',
-    paddingTop: Platform.OS === 'ios' ? 40 : StatusBar.currentHeight,
-    paddingBottom: 16,
-    paddingHorizontal: 16,
   },
   content: {
     flex: 1, // Takes the available space between the title bar and bottom nav
