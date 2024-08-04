@@ -18,6 +18,9 @@ export default function RootLayout() {
     >
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="login" options={{ headerShown: false }} />
+      <Stack.Screen name='forgotpassword' options={{
+        header: () => <CustomHeader title="Back to Login" />,
+      }} />
       <Stack.Screen name="signup" options={{
         header: () => <CustomHeader title="Back to Login" />,
       }} />

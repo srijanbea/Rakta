@@ -8,7 +8,6 @@ export default function DonorProfile() {
     <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.infoText}>Donor Profile Section</Text>
-        {/* Add the content for blood banks information here */}
       </View>
     </View>
   );

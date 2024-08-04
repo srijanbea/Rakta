@@ -7,7 +7,6 @@ export default function BloodBanksScreen() {
     <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.infoText}>Request Blood Section</Text>
-        {/* Add the content for blood banks information here */}
       </View>
     </View>
   );
