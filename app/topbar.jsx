@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         flex: 1,
-        paddingTop: 40, // paddingBottom: 10 #ios
+        paddingBottom: 10 // paddingTop: 40 #android
 
     },
     backButton: {

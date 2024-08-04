@@ -244,8 +244,8 @@ export default function DashboardScreen() {
         
         <View style={styles.optionsContainer}>
           <TouchableOpacity style={styles.optionCard} onPress={() => navigation.navigate('donorprofile')}>
-            <Icon name="person-add" size={35} color="#004aad" />
-            <Text style={styles.optionTitle}>Create Donor Profile</Text>
+            <Icon name="face" size={35} color="#004aad" />
+            <Text style={styles.optionTitle}>My Donor Profile</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.optionCard} onPress={() => navigation.navigate('donateblood')}>
             <Icon name="bloodtype" size={35} color="#004aad" />

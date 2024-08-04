@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flex: 1,
         justifyContent: 'flex-end', 
-        paddingTop: 40 // paddingBottom: 10 ios
+        paddingBottom: 10, // paddingTop: 40 #android
     },
     notificationButton: {
         marginRight: 10,
