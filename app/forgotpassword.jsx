@@ -77,6 +77,7 @@ const checkEmailExists = async (email) => {
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 80 : 0}
       >
         <ScrollView contentContainerStyle={styles.scrollView}>
           <View style={styles.logoContainer}>
