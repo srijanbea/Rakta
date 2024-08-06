@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, ActivityIndicator, Alert } from 'react-native';
 import { useNavigation } from 'expo-router';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { auth } from '../firebaseConfig';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getDoc, doc } from 'firebase/firestore';
+import { auth, db } from '../firebaseConfig';
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
@@ -19,7 +21,6 @@ export default function LoginScreen() {
         });
         return unsubscribe;
     }, [navigation]);
-
 
     const handleLogin = async () => {
         const newError = {};
@@ -38,9 +39,20 @@ export default function LoginScreen() {
             setLoading(true);
             try {
                 await signInWithEmailAndPassword(auth, email, password);
+                const user = auth.currentUser;
+
+                if (user) {
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        await AsyncStorage.setItem('fullName', userData.fullName);
+                        console.log(userData.fullName);
+                    }
+                }
+
                 navigation.reset({
                     index: 0,
-                    routes: [{ name: 'dashboard' }],
+                    routes: [{ name: 'onboarding_first' }],
                 });
             } catch (error) {
                 const errorCode = error.code;
@@ -49,7 +61,7 @@ export default function LoginScreen() {
                     setPassword('');
                     newError.password = 'Invalid Credentials';
                 } else {
-                    Alert.alert('Error', errorMessage);
+                    console.log('Error', errorMessage);
                 }
                 setError(newError);
             } finally {
@@ -266,28 +278,24 @@ const styles = StyleSheet.create({
     },
     signupContainer: {
         flexDirection: 'row',
-        alignItems: 'center',
         justifyContent: 'center',
+        marginTop: 20,
     },
     signupText: {
-        color: '#333',
+        fontSize: 16,
     },
     signupButton: {
         color: '#004aad',
         fontWeight: 'bold',
     },
     overlay: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
+        ...StyleSheet.absoluteFillObject,
         backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'center',
         alignItems: 'center',
     },
     loadingText: {
-        color: '#004aad',
+        color: '#fff',
         marginTop: 10,
     },
 });

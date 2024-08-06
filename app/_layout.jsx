@@ -1,5 +1,6 @@
 import { Stack } from 'expo-router';
 import CustomHeader from './topbar';
+import CustomHeader2 from './topbar_onboarding';
 import NotificationHeader from './topbar_notifications';
 
 export default function RootLayout() {
@@ -23,6 +24,9 @@ export default function RootLayout() {
       }} />
       <Stack.Screen name="signup" options={{
         header: () => <CustomHeader title="Back to Login" />,
+      }} />
+      <Stack.Screen name="onboarding_first" options={{
+        header: () => <CustomHeader2 title={"Skip"} />,
       }} />
       <Stack.Screen name="dashboard" options={{
         header: () => <NotificationHeader title="" />,
