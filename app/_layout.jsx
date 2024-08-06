@@ -28,6 +28,9 @@ export default function RootLayout() {
       <Stack.Screen name="onboarding_first" options={{
         header: () => <CustomHeader2 title={"Skip"} />,
       }} />
+            <Stack.Screen name="personalinfo" options={{
+        header: () => <CustomHeader2 title={"Skip"} />,
+      }} />
       <Stack.Screen name="dashboard" options={{
         header: () => <NotificationHeader title="" />,
       }} />
