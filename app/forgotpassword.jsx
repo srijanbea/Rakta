@@ -50,11 +50,14 @@ const checkEmailExists = async (email) => {
         await sendPasswordResetEmail(auth, email)
         Alert.alert('Success', 'Password reset link has been sent to your email.');
         setEmail('');
+        navigation.navigate('login');
+
       } catch (error) {
         const errorMessage = error.message;
         console.log(errorMessage)
       } finally {
         setLoading(false);
+
       }
     }
   };

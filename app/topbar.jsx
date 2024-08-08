@@ -24,22 +24,22 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 10,
         backgroundColor: '#004aad',
-        height: 80, // Set height to ensure sufficient space for header
+        height: 80, 
     },
     innerContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         flex: 1,
-        paddingBottom: 10 // paddingTop: 40 #android
+        paddingTop: 40, // paddingBottom: 10 #ios
 
     },
     backButton: {
         marginLeft: 10,
-        marginRight: 10, // Adds space between the back button and the title
+        marginRight: 10,
     },
     title: {
         color: '#fff',
-        flex: 1, // Allows title to take up remaining space
+        flex: 1,
         fontSize: 15,
         fontWeight: 'bold',
     },

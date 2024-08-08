@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, Alert, Platform, StatusBar, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
 import { useNavigation } from 'expo-router';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
@@ -57,11 +57,9 @@ export default function DashboardScreen() {
   const fetchLiveData = useCallback(async () => {
     const today = new Date();
     const startOfRange = new Date(today);
-    startOfRange.setDate(startOfRange.getDate() - 4); // 4 days before today
+    startOfRange.setDate(startOfRange.getDate() - 4);
   
-    const endOfRange = new Date(today); // Up to today
-  
-    // Query only for past and present dates
+    const endOfRange = new Date(today);
     const q = query(
       collection(firestore, 'rakta_usage'),
       where('date', '>=', startOfRange),
@@ -73,36 +71,33 @@ export default function DashboardScreen() {
       console.log('Snapshot Size:', snapshot.size);
   
       const labels = [];
-      const dataMap = {}; // Use a map to avoid duplicates
+      const dataMap = {};
   
-      // Initialize labels and data map for 4 past days, today, and 2 future days
       for (let i = 4; i >= 0; i--) {
         const date = new Date(today);
         date.setDate(date.getDate() - i);
         const formattedDate = `${date.getDate()}/${date.getMonth() + 1}`;
         labels.push(formattedDate);
-        dataMap[formattedDate] = 0; // Initialize with 0
+        dataMap[formattedDate] = 0;
       }
   
-      labels.push(`${today.getDate()}/${today.getMonth() + 1}`); // Add today
-      dataMap[`${today.getDate()}/${today.getMonth() + 1}`] = 0; // Initialize with 0 for today
+      labels.push(`${today.getDate()}/${today.getMonth() + 1}`); 
+      dataMap[`${today.getDate()}/${today.getMonth() + 1}`] = 0; 
   
       for (let i = 1; i <= 2; i++) {
         const futureDate = new Date(today);
         futureDate.setDate(futureDate.getDate() + i);
         const formattedDate = `${futureDate.getDate()}/${futureDate.getMonth() + 1}`;
         labels.push(formattedDate);
-        dataMap[formattedDate] = 0; // Initialize with 0 for upcoming days
+        dataMap[formattedDate] = 0; 
       }
-  
-      // Update data with actual values from Firestore
+
       snapshot.forEach(doc => {
         const dataPoint = doc.data();
         if (dataPoint && dataPoint.date && dataPoint.blood_donation_count !== undefined) {
           const date = dataPoint.date.toDate ? dataPoint.date.toDate() : new Date(dataPoint.date.seconds * 1000);
           const formattedDate = `${date.getDate()}/${date.getMonth() + 1}`;
   
-          // Update dataMap only if date is in labels
           if (dataMap.hasOwnProperty(formattedDate)) {
             dataMap[formattedDate] = dataPoint.blood_donation_count;
             console.log(`Updated data for ${formattedDate}:`, dataPoint.blood_donation_count);
@@ -110,7 +105,6 @@ export default function DashboardScreen() {
         }
       });
   
-      // Ensure unique labels and correct data mapping
       const finalLabels = [...new Set(labels)];
       const finalData = finalLabels.map(label => dataMap[label] || 0);
   
@@ -173,7 +167,7 @@ export default function DashboardScreen() {
         }
       });
   
-      setTotalBloodDonation(totalCount); // Ensure this updates the state
+      setTotalBloodDonation(totalCount); 
     } catch (error) {
       console.log('Error calculating total blood donation:', error);
     }

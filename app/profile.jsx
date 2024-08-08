@@ -4,7 +4,12 @@ import { useNavigation } from 'expo-router';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import BottomNavBar from './bottomnavbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
+// GoogleSignin.configure({
+//     webClientId: "275266781580-q3je1v06lsmi2bjc3e1h2rk585n95ufp.apps.googleusercontent.com",
+//     offlineAccess: true,
+//   });
 
 export default function ProfileScreen() {
   const [fullName, setFullName] = useState('');
@@ -35,6 +40,7 @@ export default function ProfileScreen() {
 
   const handleLogout = async () => {
     try {
+      // await GoogleSignin.signOut();
       await AsyncStorage.removeItem('userDetails');
       navigation.reset({
         index: 0,
@@ -77,12 +83,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f7f7f7',
-    justifyContent: 'space-between', // Ensures the bottom bar is pushed to the bottom
+    justifyContent: 'space-between',
   },
   content: {
     flex: 1,
     padding: 16,
-    justifyContent: 'space-between', // Make space for logout button
+    justifyContent: 'space-between',
   },
   infoContainer: {
     padding: 16,
@@ -102,7 +108,7 @@ const styles = StyleSheet.create({
   },
   logoutWrapper: {
     alignItems: 'center',
-    marginBottom: 75, // Ensure there's space above the bottom nav
+    marginBottom: 75,
   },
   logoutButton: {
     padding: 16,

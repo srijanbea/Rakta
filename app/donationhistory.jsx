@@ -7,6 +7,7 @@ export default function DonationHistoryScreen() {
     <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.infoText}>Donation History Section</Text>
+        {/* Add the content for blood banks information here */}
       </View>
     </View>
   );

@@ -3,8 +3,15 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert,
 import { useNavigation } from 'expo-router';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { auth, db } from '../firebaseConfig';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { collection, addDoc } from 'firebase/firestore';
+import { createUserWithEmailAndPassword, signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
+import { collection, doc, addDoc, getDoc, setDoc } from 'firebase/firestore';
+// import { GoogleSignin } from '@react-native-google-signin/google-signin';
+
+// GoogleSignin.configure({
+//     webClientId: "275266781580-q3je1v06lsmi2bjc3e1h2rk585n95ufp.apps.googleusercontent.com",
+//     offlineAccess: true,
+//   });
+
 
 export default function SignUpScreen() {
     const [fullName, setFullName] = useState('');
@@ -58,9 +65,7 @@ export default function SignUpScreen() {
             setLoading(true);
 
             try {
-                // Create a new user with email and password
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                // Store full name and email in Firestore
                 const user = userCredential.user;
                 await addDoc(collection(db, 'users'), {
                     uid: user.uid,
@@ -89,6 +94,38 @@ export default function SignUpScreen() {
         }
     };
 
+    // const signUpWithGoogle = async () => {
+    //     setLoading(true);
+    //     try {
+    //         await GoogleSignin.hasPlayServices();
+    //         const userInfo = await GoogleSignin.signIn();
+    //         const idToken = userInfo.idToken;
+    //         const credential = GoogleAuthProvider.credential(idToken);
+    //         const userCredential = await signInWithCredential(auth, credential);
+    //         const user = userCredential.user;
+    //         const userDocRef = doc(db, 'users', user.uid);
+    //         const userDoc = await getDoc(userDocRef);
+    
+    //         if (!userDoc.exists()) {
+    //             await setDoc(userDocRef, {
+    //                 uid: user.uid,
+    //                 fullName: userInfo.user.name,
+    //                 email: userInfo.user.email,
+    //                 profilePicture: userInfo.user.photo,
+    //             });
+    //         }
+    
+    //         navigation.reset({
+    //             index: 0,
+    //             routes: [{ name: 'dashboard' }],
+    //         });
+    //     } catch (error) {
+    //         console.log(error);
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
+    
 
     const getInputContainerStyle = (inputName) => ({
         ...styles.inputContainer,
@@ -186,12 +223,14 @@ export default function SignUpScreen() {
                         <TouchableOpacity style={styles.signUpButton} onPress={handleSignUp} disabled={loading}>
                             <Text style={styles.signUpButtonText}>Sign Up</Text>
                         </TouchableOpacity>
+                        {/* <TouchableOpacity style={styles.signUpWithGoogleButton} onPress={signUpWithGoogle} disabled={loading}> */}
                         <TouchableOpacity style={styles.signUpWithGoogleButton} disabled={loading}>
                             <View style={styles.googleButtonContent}>
                                 <Image source={require('../assets/images/google-icon-small.png')} style={styles.googleLogo} />
                                 <Text style={styles.signUpWithGoogleButtonText}>Sign Up With Google</Text>
                             </View>
                         </TouchableOpacity>
+
 
                     </View>
                     <View style={styles.loginContainer}>
@@ -239,7 +278,7 @@ const styles = StyleSheet.create({
         width: '100%',
     },
     fieldWrapper: {
-        marginBottom: 15, // Space between fields
+        marginBottom: 15,
     },
     inputContainer: {
         flexDirection: 'row',
@@ -262,7 +301,7 @@ const styles = StyleSheet.create({
     },
     errorText: {
         color: 'red',
-        marginTop: 5, // Small margin for error text
+        marginTop: 5,
         marginLeft: 10,
     },
     signUpButton: {
@@ -271,7 +310,7 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         alignItems: 'center',
         marginVertical: 10,
-        width: '100%', // Ensures the button takes full width
+        width: '100%',
         justifyContent: 'center',
         height: 55,
     },
@@ -289,15 +328,15 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         alignItems: 'center',
         marginVertical: 10,
-        width: '100%', // Ensures the button takes full width
-        flexDirection: 'row', // Aligns children in a row
-        justifyContent: 'center', // Centers content horizontally
+        width: '100%', 
+        flexDirection: 'row', 
+        justifyContent: 'center',
         height: 55,
     },
     googleButtonContent: {
         flexDirection: 'row',
         alignItems: 'center',
-        width: '100%', // Ensures the content takes full width
+        width: '100%',
         paddingHorizontal: 20,
         justifyContent: 'center',
     },

@@ -2,10 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, ActivityIndicator, Alert } from 'react-native';
 import { useNavigation } from 'expo-router';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getDoc, doc } from 'firebase/firestore';
-import { auth, db } from '../firebaseConfig';
+import { auth } from '../firebaseConfig';
+import { signInWithEmailAndPassword, signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+// import { GoogleSignin } from '@react-native-google-signin/google-signin';
+
+// GoogleSignin.configure({
+//     webClientId: "275266781580-q3je1v06lsmi2bjc3e1h2rk585n95ufp.apps.googleusercontent.com",
+//     offlineAccess: true,
+//   });
 
 export default function LoginScreen() {
     const [email, setEmail] = useState('');
@@ -21,6 +26,7 @@ export default function LoginScreen() {
         });
         return unsubscribe;
     }, [navigation]);
+
 
     const handleLogin = async () => {
         const newError = {};
@@ -41,15 +47,6 @@ export default function LoginScreen() {
                 await signInWithEmailAndPassword(auth, email, password);
                 const user = auth.currentUser;
 
-                if (user) {
-                    const userDoc = await getDoc(doc(db, 'users', user.uid));
-                    if (userDoc.exists()) {
-                        const userData = userDoc.data();
-                        await AsyncStorage.setItem('fullName', userData.fullName);
-                        console.log(userData.fullName);
-                    }
-                }
-
                 navigation.reset({
                     index: 0,
                     routes: [{ name: 'onboarding_first' }],
@@ -61,7 +58,7 @@ export default function LoginScreen() {
                     setPassword('');
                     newError.password = 'Invalid Credentials';
                 } else {
-                    console.log('Error', errorMessage);
+                    Alert.alert('Error', errorMessage);
                 }
                 setError(newError);
             } finally {
@@ -69,6 +66,38 @@ export default function LoginScreen() {
             }
         }
     };
+
+    // const signInWithGoogle = async () => {
+    //     setLoading(true);
+    //     try {
+    //         await GoogleSignin.hasPlayServices();
+    //         const userInfo = await GoogleSignin.signIn();
+    //         const idToken = userInfo.idToken;
+    //         const credential = GoogleAuthProvider.credential(idToken);
+    //         const userCredential = await signInWithCredential(auth, credential);
+    //         const user = userCredential.user;
+    //         const userDocRef = doc(db, 'users', user.uid);
+    //         const userDoc = await getDoc(userDocRef);
+    
+    //         if (!userDoc.exists()) {
+    //             // Create the user document with a specific ID (user.uid)
+    //             await setDoc(userDocRef, {
+    //                 uid: user.uid,
+    //                 fullName: userInfo.user.name,
+    //                 email: userInfo.user.email,
+    //                 profilePicture: userInfo.user.photo,
+    //             });
+    //         }
+    //         navigation.reset({
+    //             index: 0,
+    //             routes: [{ name: 'onboarding_first' }],
+    //         });
+    //     } catch (error) {
+    //         console.log(error);
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
 
     const getInputContainerStyle = (inputName) => ({
         ...styles.inputContainer,
@@ -134,6 +163,7 @@ export default function LoginScreen() {
                         <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={loading}>
                             <Text style={styles.loginButtonText}>Login</Text>
                         </TouchableOpacity>
+                        {/* <TouchableOpacity style={styles.signInWithGoogleButton} onPress={signInWithGoogle} disabled={loading}> */}
                         <TouchableOpacity style={styles.signInWithGoogleButton} disabled={loading}>
                             <View style={styles.googleButtonContent}>
                                 <Image source={require('../assets/images/google-icon-small.png')} style={styles.googleLogo} />
@@ -248,15 +278,15 @@ const styles = StyleSheet.create({
         borderRadius: 25,
         alignItems: 'center',
         marginVertical: 10,
-        width: '100%', // Ensures the button takes full width
-        flexDirection: 'row', // Aligns children in a row
-        justifyContent: 'center', // Centers content horizontally
+        width: '100%',
+        flexDirection: 'row',
+        justifyContent: 'center',
         height: 55,
     },
     googleButtonContent: {
         flexDirection: 'row',
         alignItems: 'center',
-        width: '100%', // Ensures the content takes full width
+        width: '100%',
         paddingHorizontal: 20,
         justifyContent: 'center',
     },
@@ -278,24 +308,28 @@ const styles = StyleSheet.create({
     },
     signupContainer: {
         flexDirection: 'row',
+        alignItems: 'center',
         justifyContent: 'center',
-        marginTop: 20,
     },
     signupText: {
-        fontSize: 16,
+        color: '#333',
     },
     signupButton: {
         color: '#004aad',
         fontWeight: 'bold',
     },
     overlay: {
-        ...StyleSheet.absoluteFillObject,
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
         backgroundColor: 'rgba(0,0,0,0.5)',
         justifyContent: 'center',
         alignItems: 'center',
     },
     loadingText: {
-        color: '#fff',
+        color: '#004aad',
         marginTop: 10,
     },
 });
