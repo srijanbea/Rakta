@@ -1,18 +1,21 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, SafeAreaView, TouchableOpacity, Text } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from 'expo-router';
 
-const CustomHeader = ({ title }) => {
+const OnboardingHeader = ({ title }) => {
     const navigation = useNavigation();
 
     return (
         <SafeAreaView style={styles.headerContainer}>
             <View style={styles.innerContainer}>
-                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                    <Icon name="arrow-back" size={25} color="#fff" />
+            <Text style={styles.title}>{title}</Text>
+                <TouchableOpacity 
+                    style={styles.skipButton} 
+                    onPress={() => navigation.navigate('dashboard')}
+                >
+                    <Icon name="arrow-forward" size={20} color="#fff" />
                 </TouchableOpacity>
-                <Text style={styles.title}>{title}</Text>
             </View>
         </SafeAreaView>
     );
@@ -24,26 +27,26 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 10,
         backgroundColor: '#004aad',
-        height: 80, 
+        height: 80, // 
     },
     innerContainer: {
         flexDirection: 'row',
         alignItems: 'center',
         flex: 1,
-        paddingBottom: 10 // paddingTop: 40 #android
-
+        justifyContent: 'flex-end', 
+        paddingHorizontal: 10, // paddingTop: 40 #android
+        paddingVertical: 10
+    
     },
-    backButton: {
-        marginLeft: 10,
+    skipButton: {
         marginRight: 10,
+        marginLeft: 10
     },
     title: {
         color: '#fff',
-        flex: 1,
         fontSize: 15,
         fontWeight: 'bold',
     },
 });
 
-
-export default CustomHeader;
+export default OnboardingHeader;

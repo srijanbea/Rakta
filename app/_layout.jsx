@@ -1,6 +1,8 @@
 import { Stack } from 'expo-router';
 import CustomHeader from './topbar';
 import NotificationHeader from './topbar_notifications';
+import OnboardingHeader from './topbar_onboarding';
+import InfoHeader from './topbar_info';
 
 export default function RootLayout() {
   return (
@@ -18,9 +20,15 @@ export default function RootLayout() {
     >
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="login" options={{ headerShown: false }} />
-      <Stack.Screen name="onboarding_first" options={{ headerShown: false }} />
-      <Stack.Screen name="personalinfo" options={{ headerShown: false }} />
-      <Stack.Screen name="medicalinfo" options={{ headerShown: false }} />
+      <Stack.Screen name="onboarding_first" options={{
+        header: () => <OnboardingHeader title='Skip'/>,
+      }} />
+      <Stack.Screen name="personalinfo" options={{
+        header: () => <InfoHeader title='Skip'/>,
+      }} />
+      <Stack.Screen name="medicalinfo" options={{
+        header: () => <InfoHeader title='Skip'/>,
+      }} />
       <Stack.Screen name='forgotpassword' options={{
         header: () => <CustomHeader title="Back to Login" />,
       }} />

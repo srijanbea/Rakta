@@ -72,7 +72,8 @@ const handleSkip = () => {
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollView}>
       <View style={styles.header}>
-                        <Text style={styles.headerText}>Personal Information</Text>
+                        <Text style={styles.headerText}>Personal</Text>
+                        <Text style={styles.headerText}>Information</Text>
                     </View>
       <Image source={require('../assets/images/onboarding2.png')} style={styles.onboardingImage} />
       <Text style={styles.infoText}>
@@ -190,9 +191,6 @@ const handleSkip = () => {
                             <Text style={styles.buttonText}>Next</Text>
                             <Icon name="arrow-forward" size={20} color="#fff" style={styles.buttonIcon} />
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={handleSkip}>
-                            <Text style={styles.skipText}>Skip</Text>
-                        </TouchableOpacity>
           </View>
 
         </View>
@@ -220,19 +218,17 @@ const styles = StyleSheet.create({
     marginBottom: 20,
 },
 header: {
-  marginTop: 10,
   marginBottom: 20,
   alignSelf: 'flex-start',
 },
 headerText: {
-  fontSize: 25,
+  fontSize: 35,
   fontWeight: 'bold',
   color: '#004aad',
-  marginTop: 20
 },
   onboardingImage: {
     width: '100%',
-    height: 150,
+    height: 250,
     resizeMode: 'contain',
     marginBottom: 20,
 },
@@ -337,7 +333,7 @@ nextButton: {
     borderRadius: 25,
     alignItems: 'center',
     justifyContent: 'center',
-    width: 120,
+    width: '100%',
 },
 buttonText: {
     color: '#fff',
@@ -347,11 +343,5 @@ buttonText: {
 },
 buttonIcon: {
     marginLeft: 5,
-},
-skipText: {
-    marginTop: 10,
-    color: '#004aad',
-    fontSize: 14,
-    fontWeight: 'bold',
 },
 });

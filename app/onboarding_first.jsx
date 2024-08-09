@@ -38,9 +38,6 @@ export default function OnboardingScreen() {
                             <Text style={styles.buttonText}>Create Your Profile</Text>
                             <Icon name="arrow-forward" size={20} color="#fff" style={styles.buttonIcon} />
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={handleSkip}>
-                            <Text style={styles.skipText}>Skip</Text>
-                        </TouchableOpacity>
                     </View>
                 </ScrollView>
             </LinearGradient>
@@ -115,11 +112,5 @@ const styles = StyleSheet.create({
     },
     buttonIcon: {
         marginLeft: 5,
-    },
-    skipText: {
-        marginTop: 10,
-        color: '#004aad',
-        fontSize: 14,
-        fontWeight: 'bold',
     },
 });
