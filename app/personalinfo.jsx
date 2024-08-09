@@ -1,20 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView, Pressable, Platform, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker } from '@react-native-picker/picker'; 
-import countries from '../assets/countries.json'; 
 import { useNavigation } from 'expo-router';
 
 export default function PersonalInfoScreen() {
-  const [fullName, setFullName] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState('');
-  const [date, setDate] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
-  const [contactNo, setContactNo] = useState('');
-  const [countryCode, setCountryCode] = useState('+977');
-  const [city, setCity] = useState('');
-  const [countryRegion, setCountryRegion] = useState('Nepal'); 
   const [focusedInput, setFocusedInput] = useState(null);
   const navigation = useNavigation();
 
@@ -25,27 +15,6 @@ export default function PersonalInfoScreen() {
 const handleSkip = () => {
     navigation.navigate('dashboard');
 };
-
-  const toggleDatePicker = () => {
-    setShowPicker(!showPicker);
-  }
-
-  const formatDate = (date) => {
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  }
-
-  const onChange = ({ type }, selectedDate) => {
-    if (type === "set") {
-      const currentDate = selectedDate || date;
-      setDate(currentDate);
-      setDateOfBirth(formatDate(currentDate));
-      if (Platform.OS === "android") {
-        toggleDatePicker();
-      }
-    } else {
-      toggleDatePicker();
-    }
-  }
 
   const getInputContainerStyle = (inputName) => ({
     ...styles.inputContainer,
@@ -59,15 +28,6 @@ const handleSkip = () => {
   });
 
   const getPlaceholderTextColor = (inputName) => focusedInput === inputName ? '#004aad' : '#aaa';
-
-  const getCountryLabel = (code) => {
-    const country = countries.find(c => c.dial_code === code);
-    return country ? `${country.flag} ${country.dial_code}` : '';
-  };
-  useEffect(() => {
-    const selectedCountry = countries.find(c => c.dial_code === countryCode);
-    setCountryRegion(selectedCountry ? selectedCountry.name : '');
-  }, [countryCode]);
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView contentContainerStyle={styles.scrollView}>
@@ -83,110 +43,7 @@ const handleSkip = () => {
                     </Text>
         
         <View style={styles.form}>
-          <View style={styles.fieldWrapper}>
-            <View style={getInputContainerStyle('fullName')}>
-              <Icon name="person-outline" size={20} style={getIconStyle('fullName')} />
-              <TextInput
-                style={styles.input}
-                placeholder="Full Name"
-                value={fullName}
-                onChangeText={setFullName}
-                placeholderTextColor={getPlaceholderTextColor('fullName')}
-                onFocus={() => setFocusedInput('fullName')}
-                onBlur={() => setFocusedInput(null)}
-              />
-            </View>
-          </View>
-
-          <View style={styles.fieldWrapper}>
-            <View style={getInputContainerStyle('dateOfBirth')}>
-              <Icon name="calendar-today" size={20} style={getIconStyle('dateOfBirth')} />
-              {
-                showPicker && (
-                  <DateTimePicker
-                    mode='date'
-                    display='spinner'
-                    value={date}
-                    onChange={onChange}
-                  />
-                )
-              }
-              {
-                !showPicker && (
-                  <Pressable onPress={toggleDatePicker} style={styles.dateContainer}>
-                    <Text style={[styles.dateText, { color: dateOfBirth ? '#000' : getPlaceholderTextColor('dateOfBirth') }]}>
-                      {dateOfBirth || "Date of Birth"}
-                    </Text>
-                  </Pressable>
-                )
-              }
-            </View>
-          </View>
-          <View style={styles.fieldWrapper}>
-            <View style={styles.rowContainer}>
-              <View style={styles.pickerContainer}>
-                <Picker
-                  selectedValue={countryCode}
-                  style={styles.picker}
-                  onValueChange={(itemValue) => {
-                    setCountryCode(itemValue);
-                  }}
-                >
-                  {countries.map((country) => (
-                    <Picker.Item
-                      key={country.code}
-                      label={`${country.flag} ${country.dial_code} (${country.code})`}
-                      value={country.dial_code}
-                    />
-                  ))}
-                </Picker>
-                <Text style={styles.countryCodeLabel}>
-                  {getCountryLabel(countryCode)}
-                </Text>
-              </View>
-
-              <View style={styles.contactNoContainer}>
-                <Icon name="phone" size={20} style={styles.contactNoIcon} />
-                <TextInput
-                  style={styles.contactNoInput}
-                  placeholder="Contact No."
-                  value={contactNo}
-                  onChangeText={setContactNo}
-                  keyboardType="phone-pad"
-                  placeholderTextColor={getPlaceholderTextColor('contactNo')}
-                  onFocus={() => setFocusedInput('contactNo')}
-                  onBlur={() => setFocusedInput(null)}
-                />
-              </View>
-            </View>
-          </View>
-          <View style={styles.fieldWrapper}>
-            <View style={getInputContainerStyle('city')}>
-              <Icon name="location-city" size={20} style={getIconStyle('city')} />
-              <TextInput
-                style={styles.input}
-                placeholder="City"
-                value={city}
-                onChangeText={setCity}
-                placeholderTextColor={getPlaceholderTextColor('city')}
-                onFocus={() => setFocusedInput('city')}
-                onBlur={() => setFocusedInput(null)}
-              />
-            </View>
-          </View>
-          <View style={styles.fieldWrapper}>
-            <View style={getInputContainerStyle('countryRegion')}>
-              <Icon name="public" size={20} style={getIconStyle('countryRegion')} />
-              <TextInput
-                style={styles.input}
-                placeholder="Country/Region"
-                value={countryRegion}
-                editable={false}
-                placeholderTextColor={getPlaceholderTextColor('countryRegion')}
-              />
-            </View>
-          </View>
-          <View style={styles.buttonContainer}>
+                      <View style={styles.buttonContainer}>
           <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
                             <Text style={styles.buttonText}>Next</Text>
                             <Icon name="arrow-forward" size={20} color="#fff" style={styles.buttonIcon} />
@@ -234,92 +91,6 @@ headerText: {
 },
   form: {
     width: '100%',
-  },
-  fieldWrapper: {
-    marginBottom: 15,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderColor: '#f0f0f0',
-    backgroundColor: '#f0f0f0',
-    borderRadius: 25,
-    paddingHorizontal: 15,
-    borderWidth: 1,
-    height: 50,
-  },
-  icon: {
-    marginRight: 10,
-  },
-  input: {
-    flex: 1,
-    height: 50,
-    fontSize: 16,
-    paddingHorizontal: 10,
-  },
-  dateContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    height: 50,
-    paddingHorizontal: 10,
-  },
-  dateText: {
-    fontSize: 16,
-    textAlign: 'left',
-  },
-  pickerContainer: {
-    flex: 0.3,
-    borderColor: '#f0f0f0',
-    backgroundColor: '#f0f0f0',
-    borderRadius: 25,
-    borderWidth: 1,
-    height: 50,
-    justifyContent: 'center',
-    paddingHorizontal: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  picker: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    opacity: 0,
-  },
-  countryCodeLabel: {
-    fontSize: 14,
-    color: '#000',
-  },
-  rowContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '100%',
-  },
-  contactNoContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderColor: '#f0f0f0',
-    backgroundColor: '#f0f0f0',
-    borderRadius: 25,
-    borderWidth: 1,
-    height: 50,
-    paddingHorizontal: 15,
-    marginLeft: 10,
-  },
-  contactNoIcon: {
-    marginRight: 10,
-    color: '#aaa'
-  },
-  contactNoInput: {
-    flex: 1,
-    height: 50,
-    fontSize: 16,
-    paddingHorizontal: 10,
-  },
-  errorText: {
-    color: 'red',
-    fontSize: 12,
-    marginTop: 5,
   },
   buttonContainer: {
     marginTop: 10,
