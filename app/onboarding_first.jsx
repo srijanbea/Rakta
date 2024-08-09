@@ -11,10 +11,6 @@ export default function OnboardingScreen() {
         navigation.navigate('personalinfo');
     };
 
-    const handleSkip = () => {
-        navigation.navigate('dashboard');
-    };
-
     return (
         <SafeAreaView style={styles.safeArea}>
             <LinearGradient

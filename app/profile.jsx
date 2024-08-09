@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Platform, StatusBar, TouchableOpacity, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useNavigation } from 'expo-router';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import BottomNavBar from './bottomnavbar';

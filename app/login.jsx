@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { useNavigation } from 'expo-router';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { auth } from '../firebaseConfig';
-import { signInWithEmailAndPassword, signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+// import { signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
+// import { doc, getDoc, setDoc } from 'firebase/firestore';
 // import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 // GoogleSignin.configure({
@@ -45,8 +46,6 @@ export default function LoginScreen() {
             setLoading(true);
             try {
                 await signInWithEmailAndPassword(auth, email, password);
-                const user = auth.currentUser;
-
                 navigation.reset({
                     index: 0,
                     routes: [{ name: 'onboarding_first' }],
@@ -58,7 +57,7 @@ export default function LoginScreen() {
                     setPassword('');
                     newError.password = 'Invalid Credentials';
                 } else {
-                    Alert.alert('Error', errorMessage);
+                    console.log('Error', errorMessage);
                 }
                 setError(newError);
             } finally {

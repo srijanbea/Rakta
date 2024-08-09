@@ -3,9 +3,11 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert,
 import { useNavigation } from 'expo-router';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { auth, db } from '../firebaseConfig';
-import { createUserWithEmailAndPassword, signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
-import { collection, doc, addDoc, getDoc, setDoc } from 'firebase/firestore';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { collection, addDoc } from 'firebase/firestore';
+// import { signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
 // import { GoogleSignin } from '@react-native-google-signin/google-signin';
+// import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 // GoogleSignin.configure({
 //     webClientId: "275266781580-q3je1v06lsmi2bjc3e1h2rk585n95ufp.apps.googleusercontent.com",
@@ -145,7 +147,7 @@ export default function SignUpScreen() {
             <KeyboardAvoidingView
                 style={styles.container}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-                // keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
+                keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 0}
             >
                 <ScrollView contentContainerStyle={styles.scrollView}>
                     <Text style={styles.heading}>Register</Text>

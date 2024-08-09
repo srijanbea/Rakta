@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, Alert, TouchableOpacity, ScrollView, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, Alert, TouchableOpacity, ScrollView, RefreshControl, Dimensions } from 'react-native';
 import { useNavigation } from 'expo-router';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
@@ -7,7 +7,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { LineChart } from 'react-native-chart-kit';
 import BottomNavBar from './bottomnavbar';
-import { Dimensions } from 'react-native';
 import { format } from 'date-fns';
 
 const screenWidth = Dimensions.get('window').width;
