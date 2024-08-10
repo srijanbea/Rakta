@@ -3,10 +3,14 @@ import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, SafeAr
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 export default function PersonalInfoScreen() {
   const [focusedInput, setFocusedInput] = useState(null);
   const [fullName, setFullName] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState(new Date());
+  const [temporaryDate, setTemporaryDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -26,10 +30,14 @@ export default function PersonalInfoScreen() {
 
     fetchUserDetails();
   }, []);
-  
 
   const handleNext = () => {
     navigation.navigate('medicalinfo');
+  };
+
+  const handleConfirmDate = () => {
+    setDateOfBirth(temporaryDate);
+    setShowDatePicker(false);
   };
 
   const getInputContainerStyle = (inputName) => ({
@@ -44,6 +52,10 @@ export default function PersonalInfoScreen() {
   });
 
   const getPlaceholderTextColor = (inputName) => focusedInput === inputName ? '#004aad' : '#aaa';
+
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-GB'); // Format: DD/MM/YYYY
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -78,6 +90,41 @@ export default function PersonalInfoScreen() {
                 onBlur={() => setFocusedInput(null)}
               />
             </View>
+
+            {/* Date of Birth Field */}
+            <Pressable
+              style={getInputContainerStyle('dateOfBirth')}
+              onPress={() => setShowDatePicker(true)}
+            >
+              <Icon name="calendar-today" size={20} style={getIconStyle('dateOfBirth')} />
+              <TextInput
+                style={styles.input}
+                placeholder="Date of Birth"
+                placeholderTextColor={getPlaceholderTextColor('dateOfBirth')}
+                value={formatDate(dateOfBirth)}
+                editable={false} // Prevent manual editing
+                pointerEvents="none" // Ensure touch events pass through the TextInput
+              />
+            </Pressable>
+
+            {showDatePicker && (
+              <View style={styles.datePickerContainer}>
+                <DateTimePicker
+                  value={temporaryDate}
+                  mode="date"
+                  display="default"
+                  onChange={(event, selectedDate) => {
+                    if (selectedDate) {
+                      setTemporaryDate(selectedDate);
+                    }
+                  }}
+                  maximumDate={new Date()} // Prevent selecting a future date
+                />
+                <TouchableOpacity style={styles.confirmButton} onPress={handleConfirmDate}>
+                  <Text style={styles.buttonText}>Confirm</Text>
+                </TouchableOpacity>
+              </View>
+            )}
 
             <View style={styles.buttonContainer}>
               <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
@@ -167,5 +214,20 @@ const styles = StyleSheet.create({
   },
   icon: {
     marginRight: 10,
+  },
+  datePickerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center', // Space between the DateTimePicker and Confirm button
+  },
+  confirmButton: {
+    flex: 1,
+    backgroundColor: '#004aad',
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderRadius: 10,
+    marginLeft: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
