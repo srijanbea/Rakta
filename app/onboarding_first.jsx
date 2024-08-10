@@ -1,15 +1,57 @@
-import React from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image, SafeAreaView, ScrollView } from 'react-native';
 import { useNavigation } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient'; 
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
+import { getAuth } from 'firebase/auth';
+import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
 export default function OnboardingScreen() {
+    const [email, setEmail] = useState('');
+    const [fullName, setFullName] = useState('');
+    const auth = getAuth();
+    const firestore = getFirestore();
     const navigation = useNavigation();
 
     const handleNext = () => {
         navigation.navigate('personalinfo');
     };
+
+    const fetchUserDetails = useCallback(async () => {
+        const user = auth.currentUser;
+        if (user) {
+          setEmail(user.email);
+    
+          const usersCollection = collection(firestore, 'users');
+          const userQuery = query(usersCollection, where('email', '==', user.email));
+    
+          try {
+            const querySnapshot = await getDocs(userQuery);
+            if (!querySnapshot.empty) {
+              const userDoc = querySnapshot.docs[0].data();
+              setFullName(userDoc.fullName);
+    
+              await AsyncStorage.setItem('userDetails', JSON.stringify({
+                email: userDoc.email,
+                fullName: userDoc.fullName,
+              }));
+            } else {
+              console.log('No such document!');
+            }
+          } catch (error) {
+            console.log('Error fetching user details:', error);
+          }
+        } else {
+          console.log('Error', 'No user is logged in.');
+        }
+      }, [auth, firestore]);
+
+      useEffect(() => {
+        fetchUserDetails();
+      }, [fetchUserDetails]);
 
     return (
         <SafeAreaView style={styles.safeArea}>

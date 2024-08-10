@@ -1,12 +1,31 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView, Pressable, Platform, Image, KeyboardAvoidingView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function PersonalInfoScreen() {
   const [focusedInput, setFocusedInput] = useState(null);
   const [fullName, setFullName] = useState('');
   const navigation = useNavigation();
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      try {
+        const userDetailsJson = await AsyncStorage.getItem('userDetails');
+        if (userDetailsJson) {
+          const userDetails = JSON.parse(userDetailsJson);
+          setFullName(userDetails.fullName);
+        } else {
+          console.log('Error', 'No user details found.');
+        }
+      } catch (error) {
+        console.log('Error retrieving user details:', error);
+      }
+    };
+
+    fetchUserDetails();
+  }, []);
   
 
   const handleNext = () => {
