@@ -11,6 +11,10 @@ export default function PersonalInfoScreen() {
   const [dateOfBirth, setDateOfBirth] = useState(new Date());
   const [temporaryDate, setTemporaryDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const [contactNumber, setContactNumber] = useState('');
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [country, setCountry] = useState('');
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -42,7 +46,7 @@ export default function PersonalInfoScreen() {
 
   const getInputContainerStyle = (inputName) => ({
     ...styles.inputContainer,
-    borderColor: focusedInput === inputName ? '#004aad' : '#f0f0f0',
+    borderColor: focusedInput === inputName ? 'transparent' : '#f0f0f0',
     backgroundColor: focusedInput === inputName ? '#e6f0ff' : '#f0f0f0',
   });
 
@@ -78,6 +82,7 @@ export default function PersonalInfoScreen() {
 
           <View style={styles.form}>
             {/* Full Name Field */}
+            <Text style={styles.label}>Full Name</Text>
             <View style={getInputContainerStyle('fullName')}>
               <Icon name="person" size={20} style={getIconStyle('fullName')} />
               <TextInput
@@ -92,6 +97,7 @@ export default function PersonalInfoScreen() {
             </View>
 
             {/* Date of Birth Field */}
+            <Text style={styles.label}>Date of Birth</Text>
             <Pressable
               style={getInputContainerStyle('dateOfBirth')}
               onPress={() => setShowDatePicker(true)}
@@ -125,6 +131,67 @@ export default function PersonalInfoScreen() {
                 </TouchableOpacity>
               </View>
             )}
+
+            {/* Contact Number Field */}
+            <Text style={styles.label}>Contact No</Text>
+            <View style={getInputContainerStyle('contactNumber')}>
+              <Icon name="phone" size={20} style={getIconStyle('contactNumber')} />
+              <TextInput
+                style={styles.input}
+                placeholder="Contact Number"
+                placeholderTextColor={getPlaceholderTextColor('contactNumber')}
+                value={contactNumber}
+                onChangeText={setContactNumber}
+                onFocus={() => setFocusedInput('contactNumber')}
+                onBlur={() => setFocusedInput(null)}
+                keyboardType="phone-pad" // Use phone pad for contact number input
+              />
+            </View>
+
+            {/* City/District Field */}
+            <Text style={styles.label}>City / District</Text>
+            <View style={getInputContainerStyle('city')}>
+              <Icon name="location-city" size={20} style={getIconStyle('city')} />
+              <TextInput
+                style={styles.input}
+                placeholder="City / District"
+                placeholderTextColor={getPlaceholderTextColor('city')}
+                value={city}
+                onChangeText={setCity}
+                onFocus={() => setFocusedInput('city')}
+                onBlur={() => setFocusedInput(null)}
+              />
+            </View>
+
+            {/* State/Province Field */}
+            <Text style={styles.label}>State / Province</Text>
+            <View style={getInputContainerStyle('state')}>
+              <Icon name="map" size={20} style={getIconStyle('state')} />
+              <TextInput
+                style={styles.input}
+                placeholder="State / Province"
+                placeholderTextColor={getPlaceholderTextColor('state')}
+                value={state}
+                onChangeText={setState}
+                onFocus={() => setFocusedInput('state')}
+                onBlur={() => setFocusedInput(null)}
+              />
+            </View>
+
+            {/* Country/Region Field */}
+            <Text style={styles.label}>Country / Region</Text>
+            <View style={getInputContainerStyle('country')}>
+              <Icon name="public" size={20} style={getIconStyle('country')} />
+              <TextInput
+                style={styles.input}
+                placeholder="Country / Region"
+                placeholderTextColor={getPlaceholderTextColor('country')}
+                value={country}
+                onChangeText={setCountry}
+                onFocus={() => setFocusedInput('country')}
+                onBlur={() => setFocusedInput(null)}
+              />
+            </View>
 
             <View style={styles.buttonContainer}>
               <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
@@ -168,66 +235,68 @@ const styles = StyleSheet.create({
   },
   onboardingImage: {
     width: '100%',
-    height: 250,
+    height: 200,
     resizeMode: 'contain',
     marginBottom: 20,
   },
   form: {
     width: '100%',
   },
+  label: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#000',
+    marginBottom: 5,
+    marginLeft: 15
+  },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    borderColor: '#f0f0f0',
+    backgroundColor: '#f0f0f0',
     borderRadius: 25,
-    paddingHorizontal: 15,
-    marginBottom: 15,
-    height: 50,
+    paddingHorizontal: 20,
+    borderWidth: 1,
+    height: 45,
+    marginBottom: 15
+},
+  icon: {
+    marginRight: 10,
   },
   input: {
     flex: 1,
-    marginLeft: 10,
     fontSize: 16,
-    color: '#000',
+    color: '#333',
   },
-  buttonContainer: {
+  datePickerContainer: {
+    marginBottom: 15,
+  },
+  confirmButton: {
     marginTop: 10,
-    alignItems: 'center',
-  },
-  nextButton: {
-    flexDirection: 'row',
     backgroundColor: '#004aad',
-    paddingVertical: 15,
-    paddingHorizontal: 15,
-    borderRadius: 25,
+    padding: 10,
+    borderRadius: 5,
     alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
-    marginRight: 10,
   },
-  buttonIcon: {
-    marginLeft: 5,
+  buttonContainer: {
+    alignItems: 'flex-end',
   },
-  icon: {
-    marginRight: 10,
-  },
-  datePickerContainer: {
+  nextButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center', // Space between the DateTimePicker and Confirm button
-  },
-  confirmButton: {
-    flex: 1,
     backgroundColor: '#004aad',
-    paddingVertical: 8,
-    paddingHorizontal: 8,
-    borderRadius: 10,
-    marginLeft: 10,
+    padding: 15,
+    borderRadius: 25,
+    width: '100%',
     justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'center'
+  },
+  buttonIcon: {
+    marginLeft: 10,
   },
 });
