@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView, Image, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { useNavigation } from 'expo-router';
 
 export default function MedicalInfoScreen() {
@@ -8,20 +9,54 @@ export default function MedicalInfoScreen() {
   const [selectedHeight, setSelectedHeight] = useState('170'); // Default height
   const [selectedWeight, setSelectedWeight] = useState('70'); // Default weight
   const [pressedButton, setPressedButton] = useState(null); // For tracking pressed button
+  const [selectedChronicDiseases, setSelectedChronicDiseases] = useState([]); // Chronic diseases state
+  const [hasDonatedRecently, setHasDonatedRecently] = useState(null);
+  const [errors, setErrors] = useState({ height: '', weight: '', bloodType: '' }); // Error state
+
   const navigation = useNavigation();
 
   const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
+  const chronicDiseases = [
+    'Diabetes',
+    'Hypertension',
+    'Asthma',
+    'Heart Disease',
+    'Chronic Kidney Disease',
+    'COPD',
+    'None',
+  ];
 
-  const handleBloodTypeSelect = (type) => {
-    setSelectedBloodType(type);
+  const validateInputs = () => {
+    let valid = true;
+    const newErrors = { height: '', weight: '', bloodType: '' };
+
+    if (!selectedBloodType) {
+      newErrors.bloodType = 'Please select a blood type';
+      valid = false;
+    }
+
+    if (parseInt(selectedHeight, 10) < 100 || parseInt(selectedHeight, 10) > 250) {
+      newErrors.height = 'Height must be between 100 and 250 cm';
+      valid = false;
+    }
+
+    if (parseInt(selectedWeight, 10) < 30 || parseInt(selectedWeight, 10) > 200) {
+      newErrors.weight = 'Weight must be between 30 and 200 kg';
+      valid = false;
+    }
+
+    setErrors(newErrors);
+    return valid;
   };
 
   const handleNext = () => {
-    if (!selectedBloodType || !selectedHeight || !selectedWeight) {
-      alert('Please fill in all required fields before proceeding.');
-      return;
+    if (validateInputs()) {
+      navigation.navigate('dashboard');
     }
-    navigation.navigate('dashboard');
+  };
+
+  const handleBloodTypeSelect = (type) => {
+    setSelectedBloodType(type);
   };
 
   const incrementHeight = () => {
@@ -54,6 +89,13 @@ export default function MedicalInfoScreen() {
     }
   };
 
+  const handleChronicDiseaseSelect = (disease, isChecked) => {
+    setSelectedChronicDiseases((prev) =>
+      isChecked ? [...prev, disease] : prev.filter((d) => d !== disease)
+    );
+  };
+  
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
@@ -75,6 +117,7 @@ export default function MedicalInfoScreen() {
             Thank you for trusting us with your important information.      
           </Text>
           
+          <View style={styles.fieldWrapper}>
           <View style={styles.form}>
             <Text style={styles.label}>Blood Group</Text>
 
@@ -105,6 +148,9 @@ export default function MedicalInfoScreen() {
                 </TouchableOpacity>
               ))}
             </View>
+            {errors.bloodType ? <Text style={styles.errorText}>{errors.bloodType}</Text> : null}
+          </View>
+  
 
             <View style={styles.inputContainer}>
               <View style={styles.stepperGroup}>
@@ -139,6 +185,7 @@ export default function MedicalInfoScreen() {
                     <Text style={styles.stepperText}>+</Text>
                   </TouchableOpacity>
                 </View>
+                {errors.height ? <Text style={styles.errorText}>{errors.height}</Text> : null}
               </View>
 
               <View style={styles.stepperGroup}>
@@ -173,6 +220,52 @@ export default function MedicalInfoScreen() {
                     <Text style={styles.stepperText}>+</Text>
                   </TouchableOpacity>
                 </View>
+                {errors.weight ? <Text style={styles.errorText}>{errors.weight}</Text> : null}
+              </View>
+            </View>
+
+            <View style={styles.form}>
+              <Text style={styles.label}>Chronic Diseases ( If Any )</Text>
+              {chronicDiseases.map((disease, index) => (
+                <BouncyCheckbox
+                  key={index}
+                  text={disease}
+                  fillColor="#004aad"
+                  unfillColor="#FFFFFF"
+                  textStyle={{ textDecorationLine: 'none' }}
+                  iconStyle={{ borderColor: '#004aad', borderRadius: 8 }}
+                  innerIconStyle={{ borderRadius: 8 }} // Adjust for rounded square
+                  style={{ marginBottom: 10 }}
+                  onPress={(isChecked) => handleChronicDiseaseSelect(disease, isChecked)}
+                />
+              ))}
+            </View>
+
+            <View style={styles.form}>
+              <Text style={styles.label}>Have you donated blood in the past 6 months?</Text>
+              <View style={styles.radioGroup}>
+                <TouchableOpacity
+                  style={styles.radioButton}
+                  onPress={() => setHasDonatedRecently('Yes')}
+                >
+                  <Icon
+                    name={hasDonatedRecently === 'Yes' ? 'radio-button-checked' : 'radio-button-unchecked'}
+                    size={24}
+                    color="#004aad"
+                  />
+                  <Text style={styles.radioText}>Yes</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.radioButton}
+                  onPress={() => setHasDonatedRecently('No')}
+                >
+                  <Icon
+                    name={hasDonatedRecently === 'No' ? 'radio-button-checked' : 'radio-button-unchecked'}
+                    size={24}
+                    color="#004aad"
+                  />
+                  <Text style={styles.radioText}>No</Text>
+                </TouchableOpacity>
               </View>
             </View>
 
@@ -221,17 +314,18 @@ const styles = StyleSheet.create({
   },
   onboardingImage: {
     width: '100%',
-    height: 250,
+    height: 200,
     resizeMode: 'contain',
     marginBottom: 20,
   },
   form: {
     width: '100%',
+    marginBottom: 15
   },
   label: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#004aad',
+    color: '#000',
     marginBottom: 10,
     alignSelf: 'flex-start',
   },
@@ -267,13 +361,15 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: 15,
   },
   stepperGroup: {
+    marginTop: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 10,
+    paddingRight: 10,
   },
   stepperContainer: {
     flexDirection: 'row',
@@ -307,6 +403,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#004aad',
     marginHorizontal: 10,
+  },
+  radioGroup: {
+    flexDirection: 'row',
+    justifyContent: 'left',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  radioButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  radioText: {
+    marginLeft: 10,
+    fontSize: 16,
+    color: '#004aad',
+    marginRight: 30
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 12,
+    textAlign: 'center'
   },
   buttonContainer: {
     marginTop: 10,

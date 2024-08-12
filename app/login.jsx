@@ -251,6 +251,7 @@ const styles = StyleSheet.create({
         color: 'red',
         marginTop: 5,
         marginLeft: 10,
+        fontSize: 12
     },
     icon: {
         marginRight: 10,
