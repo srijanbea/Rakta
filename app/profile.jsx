@@ -1,19 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { useNavigation } from 'expo-router';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, ScrollView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import BottomNavBar from './bottomnavbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-// import { GoogleSignin } from '@react-native-google-signin/google-signin';
-
-// GoogleSignin.configure({
-//     webClientId: "275266781580-q3je1v06lsmi2bjc3e1h2rk585n95ufp.apps.googleusercontent.com",
-//     offlineAccess: true,
-//   });
+import BottomNavBar from './bottomnavbar';
 
 export default function ProfileScreen() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
+  const [bloodGroup, setBloodGroup] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [location, setLocation] = useState('');
+  const [dob, setDob] = useState('');
+  const [lastDonationDate, setLastDonationDate] = useState('');
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
 
@@ -25,11 +24,16 @@ export default function ProfileScreen() {
           const userDetails = JSON.parse(userDetailsJson);
           setFullName(userDetails.fullName);
           setEmail(userDetails.email);
+          setBloodGroup(userDetails.bloodGroup);
+          setPhoneNumber(userDetails.phoneNumber);
+          setLocation(userDetails.location);
+          setDob(userDetails.dob);
+          setLastDonationDate(userDetails.lastDonationDate);
         } else {
-          console.log('Error', 'No user details found.');
+          console.log('No user details found.');
         }
       } catch (error) {
-        console.log('Error retrieving user details:', error);
+        console.error('Error retrieving user details:', error);
       } finally {
         setLoading(false);
       }
@@ -40,17 +44,15 @@ export default function ProfileScreen() {
 
   const handleLogout = async () => {
     try {
-      // await GoogleSignin.signOut();
       await AsyncStorage.removeItem('userDetails');
       navigation.reset({
         index: 0,
         routes: [{ name: 'login' }],
       });
     } catch (error) {
-      console.log('Error logging out:', error);
+      console.error('Error logging out:', error);
     }
   };
-
 
   if (loading) {
     return (
@@ -62,18 +64,46 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
+      <ScrollView contentContainerStyle={styles.scrollViewContent}>
+        <View style={styles.profileHeader}>
+          <Image
+            source={{ uri: 'https://scontent.fktm1-1.fna.fbcdn.net/v/t39.30808-6/445161318_747497967588769_1677089034473477694_n.jpg?stp=cp6_dst-jpg&_nc_cat=107&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=p7FhwVnLc_IQ7kNvgFJe7UB&_nc_ht=scontent.fktm1-1.fna&oh=00_AYCUD2-SyAOLFN7vm70Q7aETFgybaONpvREhLAVngDPtmA&oe=66BDF451' }} // Placeholder for profile picture
+            style={styles.profileImage}
+          />
+          <Text style={styles.userName}>{fullName}</Text>
+          <Text style={styles.userDetails}>Blood Group: {bloodGroup}</Text>
+        </View>
         <View style={styles.infoContainer}>
-          <Text style={styles.details}>Full Name: {fullName}</Text>
-          <Text style={styles.details}>Email: {email}</Text>
+          <View style={styles.infoRow}>
+            <Icon name="person" size={20} color="#004aad" />
+            <Text style={styles.details}>{fullName}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Icon name="email" size={20} color="#004aad" />
+            <Text style={styles.details}>{email}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Icon name="phone" size={20} color="#004aad" />
+            <Text style={styles.details}>Phone: {phoneNumber}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Icon name="location-on" size={20} color="#004aad" />
+            <Text style={styles.details}>Location: {location}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Icon name="calendar-today" size={20} color="#004aad" />
+            <Text style={styles.details}>DOB: {dob}</Text>
+          </View>
+          <View style={styles.infoRow}>
+            <Icon name="history" size={20} color="#004aad" />
+            <Text style={styles.details}>Last Donation: {lastDonationDate}</Text>
+          </View>
         </View>
-        <View style={styles.logoutWrapper}>
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <Icon name="logout" size={24} color="#fff" />
-            <Text style={styles.logoutText}>Logout</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Icon name="logout" size={20} color="#fff" />
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
+      </ScrollView>
       <BottomNavBar activeScreen="profile" />
     </View>
   );
@@ -83,50 +113,81 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f7f7f7',
-    justifyContent: 'space-between',
   },
-  content: {
-    flex: 1,
-    padding: 16,
-    justifyContent: 'space-between',
+  scrollViewContent: {
+    padding: 20,
+  },
+  profileHeader: {
+    alignItems: 'center',
+    paddingVertical: 20,
+    backgroundColor: '#004aad',
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+    marginBottom: 20,
+  },
+  profileImage: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    marginBottom: 10,
+    borderWidth: 4,
+    borderColor: '#fff',
+  },
+  userName: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#fff',
+    marginBottom: 5,
+  },
+  userDetails: {
+    fontSize: 16,
+    color: '#dbe1e8',
   },
   infoContainer: {
-    padding: 16,
     backgroundColor: '#fff',
-    borderRadius: 8,
+    borderRadius: 12,
+    padding: 15,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 10,
+    elevation: 5,
+    marginBottom: 30,
+  },
+  infoRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 15,
   },
   details: {
-    fontSize: 18,
-    marginBottom: 8,
+    fontSize: 16,
+    marginLeft: 10,
     color: '#333',
   },
-  logoutWrapper: {
-    alignItems: 'center',
-    marginBottom: 75,
-  },
   logoutButton: {
-    padding: 16,
     backgroundColor: '#004aad',
-    borderRadius: 8,
+    borderRadius: 12,
+    paddingVertical: 15,
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
-    width: '80%',
+    marginHorizontal: 20,
+    elevation: 5,
   },
   logoutText: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#fff',
-    marginLeft: 8,
+    marginLeft: 10,
+    fontWeight: '600',
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#f7f7f7',
   },
 });
