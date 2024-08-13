@@ -60,7 +60,7 @@ export default function BloodBanksScreen() {
         </TouchableOpacity>
       </View>
       <View style={styles.header}>
-      <Image source={require('/home/srijanbea/Rakta-main/assets/images/blood-bag.png')} style={styles.logo} />
+      <Image source={require('../assets/images/blood-bag.png')} style={styles.logo} />
         <Text style={styles.headerText}>Blood Banks Section</Text>
       </View>
       <View style={styles.content}>

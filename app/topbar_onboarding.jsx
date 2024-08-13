@@ -12,7 +12,10 @@ const OnboardingHeader = ({ title }) => {
             <Text style={styles.title}>{title}</Text>
                 <TouchableOpacity 
                     style={styles.skipButton} 
-                    onPress={() => navigation.navigate('dashboard')}
+                    onPress={() =>         navigation.reset({
+                        index: 0,
+                        routes: [{ name: 'dashboard' }],
+                    })}
                 >
                     <Icon name="arrow-forward" size={20} color="#fff" />
                 </TouchableOpacity>

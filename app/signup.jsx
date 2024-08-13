@@ -74,6 +74,21 @@ export default function SignUpScreen() {
                     fullName: fullName,
                     email: email,
                     profilePicture: '',
+                    onboardingCompleted: false,
+                    dateOfBirth: '',
+                    contactNo: '',
+                    cityDistrict: '',
+                    stateProvince: '',
+                    countryRegion: '',
+                    bloodGroup: '',
+                    height: '',
+                    weight: '',
+                    hasChronicDisease: false,
+                    donatedBloodRecently: false,
+                    systemRole: 'USER',
+                    registrationTimestamp: new Date().toISOString(),
+                    currentLatitude: '',
+                    currentLongitude: '',
                 });
 
                 Alert.alert(

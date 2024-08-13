@@ -17,7 +17,10 @@ export default function OnboardingScreen() {
     const navigation = useNavigation();
 
     const handleNext = () => {
-        navigation.navigate('personalinfo');
+        navigation.reset({
+            index: 0,
+            routes: [{ name: 'personalinfo' }],
+        });
     };
 
     const fetchUserDetails = useCallback(async () => {
@@ -37,6 +40,8 @@ export default function OnboardingScreen() {
               await AsyncStorage.setItem('userDetails', JSON.stringify({
                 email: userDoc.email,
                 fullName: userDoc.fullName,
+                contactNo: userDoc.contactNo,
+                
               }));
             } else {
               console.log('No such document!');

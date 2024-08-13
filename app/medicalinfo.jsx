@@ -3,6 +3,9 @@ import { View, Text, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView, Ima
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { useNavigation } from 'expo-router';
+import {doc, collection, query, where, getDocs, setDoc} from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import { db } from '../firebaseConfig';
 
 export default function MedicalInfoScreen() {
   const [selectedBloodType, setSelectedBloodType] = useState('');
@@ -25,6 +28,8 @@ export default function MedicalInfoScreen() {
     'COPD',
     'None',
   ];
+  const hasChronicDisease = selectedChronicDiseases.length > 0 && !selectedChronicDiseases.includes('None');
+  const donatedBloodRecently = hasDonatedRecently === 'Yes';
 
   const validateInputs = () => {
     let valid = true;
@@ -49,9 +54,48 @@ export default function MedicalInfoScreen() {
     return valid;
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (validateInputs()) {
-      navigation.navigate('dashboard');
+      try {
+        const auth = getAuth();
+        const user = auth.currentUser;
+  
+        if (user) {
+          const email = user.email;
+  
+          // Query for the user document by email
+          const usersCollection = collection(db, 'users');
+          const userQuery = query(usersCollection, where('email', '==', email));
+          const querySnapshot = await getDocs(userQuery);
+  
+          if (!querySnapshot.empty) {
+            const userDoc = querySnapshot.docs[0]; // Get the first document
+            const userDocRef = doc(db, 'users', userDoc.id); // Get the reference to the document
+  
+            // Update the fields of the user document
+            await setDoc(userDocRef, {
+              onboardingCompleted: true,
+              bloodGroup: selectedBloodType,
+              height: selectedHeight,
+              weight: selectedWeight,
+              hasChronicDisease: hasChronicDisease,
+              donatedBloodRecently: donatedBloodRecently,
+            }, { merge: true });
+  
+            console.log('User details updated successfully');
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'dashboard' }],
+          });
+          } else {
+            console.log('No user document found with this email.');
+          }
+        } else {
+          console.log('No user is currently signed in.');
+        }
+      } catch (error) {
+        console.log('Error saving user details:', error);
+      }
     }
   };
 

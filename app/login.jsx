@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, ScrollView, SafeAreaView, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { useNavigation } from 'expo-router';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { auth } from '../firebaseConfig';
+import { auth, db } from '../firebaseConfig';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 // import { signInWithCredential, GoogleAuthProvider } from 'firebase/auth';
 // import { doc, getDoc, setDoc } from 'firebase/firestore';
 // import { GoogleSignin } from '@react-native-google-signin/google-signin';
@@ -31,33 +32,59 @@ export default function LoginScreen() {
 
     const handleLogin = async () => {
         const newError = {};
-
+    
+        // Validate email and password
         if (!email) {
             newError.email = 'This field is required';
         }
-
         if (!password) {
             newError.password = 'This field is required';
         }
-
         setError(newError);
-
+    
         if (Object.keys(newError).length === 0) {
             setLoading(true);
             try {
-                await signInWithEmailAndPassword(auth, email, password);
-                navigation.reset({
-                    index: 0,
-                    routes: [{ name: 'onboarding_first' }],
-                });
+                // Sign in the user with email and password
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+    
+                // Query the Firestore database for the user document by email
+                const usersCollection = collection(db, 'users');
+                const q = query(usersCollection, where('email', '==', email));
+                const querySnapshot = await getDocs(q);
+    
+                if (!querySnapshot.empty) {
+                    querySnapshot.forEach((doc) => {
+                        const userData = doc.data();
+                        const onboardingCompleted = userData.onboardingCompleted;
+    
+                        // Check onboardingCompleted status and navigate accordingly
+                        if (onboardingCompleted) {
+                            navigation.reset({
+                                index: 0,
+                                routes: [{ name: 'dashboard' }],
+                            });
+                        } else {
+                            navigation.reset({
+                                index: 0,
+                                routes: [{ name: 'onboarding_first' }],
+                            });
+                        }
+                    });
+                } else {
+                    console.log('No user document found with this email!');
+                    // Optional: You might want to create a user document here if one doesn't exist
+                }
             } catch (error) {
                 const errorCode = error.code;
                 const errorMessage = error.message;
+    
                 if (errorCode === 'auth/invalid-credential') {
                     setPassword('');
                     newError.password = 'Invalid Credentials';
                 } else {
-                    console.log('Error', errorMessage);
+                    console.log('Error:', errorMessage);
                 }
                 setError(newError);
             } finally {
@@ -65,7 +92,6 @@ export default function LoginScreen() {
             }
         }
     };
-
     // const signInWithGoogle = async () => {
     //     setLoading(true);
     //     try {

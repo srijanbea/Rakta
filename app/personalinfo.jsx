@@ -1,17 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView, Pressable, Platform, Image, KeyboardAvoidingView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import {doc, collection, query, where, getDocs, setDoc} from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import { db } from '../firebaseConfig';
 
 export default function PersonalInfoScreen() {
   const [focusedInput, setFocusedInput] = useState(null);
+  const [uid, setuid] = useState('');
   const [fullName, setFullName] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState(new Date());
   const [temporaryDate, setTemporaryDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [contactNumber, setContactNumber] = useState('');
+  const [contactNo, setContactNo] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
   const [country, setCountry] = useState('');
@@ -24,6 +28,7 @@ export default function PersonalInfoScreen() {
         const userDetailsJson = await AsyncStorage.getItem('userDetails');
         if (userDetailsJson) {
           const userDetails = JSON.parse(userDetailsJson);
+          setuid(userDetails.uid);
           setFullName(userDetails.fullName);
         } else {
           console.log('Error', 'No user details found.');
@@ -39,7 +44,7 @@ export default function PersonalInfoScreen() {
   const validateForm = () => {
     const newError = {};
     if (!fullName) newError.fullName = 'Full Name is required';
-    if (!contactNumber) newError.contactNumber = 'Contact Number is required';
+    if (!contactNo) newError.contactNo = 'Contact Number is required';
     if (!city) newError.city = 'City is required';
     if (!state) newError.state = 'State is required';
     if (!country) newError.country = 'Country is required';
@@ -47,12 +52,49 @@ export default function PersonalInfoScreen() {
     return Object.keys(newError).length === 0;
   };
 
-  const handleNext = () => {
+
+  const handleNext = async () => {
     if (validateForm()) {
-      navigation.navigate('medicalinfo');
+      try {
+        const auth = getAuth();
+        const user = auth.currentUser;
+  
+        if (user) {
+          const email = user.email;
+  
+          // Query for the user document by email
+          const usersCollection = collection(db, 'users');
+          const userQuery = query(usersCollection, where('email', '==', email));
+          const querySnapshot = await getDocs(userQuery);
+  
+          if (!querySnapshot.empty) {
+            const userDoc = querySnapshot.docs[0]; // Get the first document
+            const userDocRef = doc(db, 'users', userDoc.id); // Get the reference to the document
+  
+            // Update the fields of the user document
+            await setDoc(userDocRef, {
+              fullName: fullName,
+              dateOfBirth: dateOfBirth.toLocaleDateString('en-GB'),
+              contactNo: contactNo,
+              cityDistrict: city,
+              stateProvince: state,
+              countryRegion: country,
+            }, { merge: true });
+  
+            console.log('User details updated successfully');
+            navigation.navigate('medicalinfo');
+          } else {
+            console.log('No user document found with this email.');
+          }
+        } else {
+          console.log('No user is currently signed in.');
+        }
+      } catch (error) {
+        console.log('Error saving user details:', error);
+      }
     }
   };
-
+  
   const handleConfirmDate = () => {
     setDateOfBirth(temporaryDate);
     setShowDatePicker(false);
@@ -153,20 +195,20 @@ export default function PersonalInfoScreen() {
             {/* Contact Number Field */}
             <View style={styles.fieldWrapper}>
               <Text style={styles.label}>Contact No</Text>
-              <View style={getInputContainerStyle('contactNumber')}>
-                <Icon name="phone" size={20} style={getIconStyle('contactNumber')} />
+              <View style={getInputContainerStyle('contactNo')}>
+                <Icon name="phone" size={20} style={getIconStyle('contactNo')} />
                 <TextInput
                   style={styles.input}
                   placeholder="Contact Number"
-                  placeholderTextColor={getPlaceholderTextColor('contactNumber')}
-                  value={contactNumber}
-                  onChangeText={setContactNumber}
-                  onFocus={() => setFocusedInput('contactNumber')}
+                  placeholderTextColor={getPlaceholderTextColor('contactNo')}
+                  value={contactNo}
+                  onChangeText={setContactNo}
+                  onFocus={() => setFocusedInput('contactNo')}
                   onBlur={() => setFocusedInput(null)}
                   keyboardType="phone-pad" // Use phone pad for contact number input
                 />
               </View>
-              {error.contactNumber && <Text style={styles.errorText}>{error.contactNumber}</Text>}
+              {error.contactNo && <Text style={styles.errorText}>{error.contactNo}</Text>}
             </View>
 
             {/* City/District Field */}
@@ -265,7 +307,7 @@ const styles = StyleSheet.create({
   },
   onboardingImage: {
     width: '100%',
-    height: 200,
+    height: 250,
     resizeMode: 'contain',
     marginBottom: 20,
   },
@@ -301,6 +343,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   datePickerContainer: {
+    marginTop: 10,
     marginBottom: 15,
   },
   confirmButton: {
