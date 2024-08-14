@@ -12,6 +12,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function OnboardingScreen() {
     const [email, setEmail] = useState('');
     const [fullName, setFullName] = useState('');
+    const [dateOfBirth, setDateOfBirth] = useState(new Date());
+    const [contactNo, setContactNo] = useState('');
+    const [cityDistrict, setCityDistrict] = useState('');
+    const [stateProvince, setStateProvince] = useState('');
+    const [countryRegion, setCountryRegion] = useState('');
     const auth = getAuth();
     const firestore = getFirestore();
     const navigation = useNavigation();
@@ -36,11 +41,21 @@ export default function OnboardingScreen() {
             if (!querySnapshot.empty) {
               const userDoc = querySnapshot.docs[0].data();
               setFullName(userDoc.fullName);
+              setDateOfBirth(userDoc.dateOfBirth);
+              setContactNo(userDoc.contactNo);
+              setCityDistrict(userDoc.cityDistrict);
+              setStateProvince(userDoc.stateProvince);
+              setCountryRegion(userDoc.countryRegion);
     
               await AsyncStorage.setItem('userDetails', JSON.stringify({
                 email: userDoc.email,
                 fullName: userDoc.fullName,
+                dateOfBirth: userDoc.dateOfBirth,
                 contactNo: userDoc.contactNo,
+                cityDistrict: userDoc.cityDistrict,
+                stateProvince: userDoc.stateProvince,
+                countryRegion: userDoc.countryRegion,
+
                 
               }));
             } else {
@@ -57,6 +72,14 @@ export default function OnboardingScreen() {
       useEffect(() => {
         fetchUserDetails();
       }, [fetchUserDetails]);
+
+      console.log(email);
+      console.log(fullName);
+      console.log(dateOfBirth);
+      console.log(contactNo);
+      console.log(stateProvince);
+      console.log(cityDistrict);
+      console.log(countryRegion);
 
     return (
         <SafeAreaView style={styles.safeArea}>

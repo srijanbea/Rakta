@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView, Image, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
@@ -6,6 +6,7 @@ import { useNavigation } from 'expo-router';
 import {doc, collection, query, where, getDocs, setDoc} from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { db } from '../firebaseConfig';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function MedicalInfoScreen() {
   const [selectedBloodType, setSelectedBloodType] = useState('');
@@ -15,9 +16,7 @@ export default function MedicalInfoScreen() {
   const [selectedChronicDiseases, setSelectedChronicDiseases] = useState([]); // Chronic diseases state
   const [hasDonatedRecently, setHasDonatedRecently] = useState(null);
   const [errors, setErrors] = useState({ height: '', weight: '', bloodType: '' }); // Error state
-
   const navigation = useNavigation();
-
   const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'];
   const chronicDiseases = [
     'Diabetes',
@@ -166,32 +165,33 @@ export default function MedicalInfoScreen() {
             <Text style={styles.label}>Blood Group</Text>
 
             <View style={styles.bloodTypeContainer}>
-              {bloodTypes.map((type) => (
-                <TouchableOpacity
-                  key={type}
-                  style={[
-                    styles.bloodTypeCard,
-                    selectedBloodType === type && styles.selectedCard,
-                  ]}
-                  onPress={() => handleBloodTypeSelect(type)}
-                >
-                  <Icon
-                    name="opacity"
-                    size={24}
-                    color={selectedBloodType === type ? "#fff" : "#aaa"}
-                    style={styles.bloodIcon}
-                  />
-                  <Text
-                    style={[
-                      styles.bloodTypeText,
-                      selectedBloodType === type && styles.selectedText,
-                    ]}
-                  >
-                    {type}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+  {bloodTypes.map((type) => (
+    <TouchableOpacity
+      key={type}
+      style={[
+        styles.bloodTypeCard,
+        selectedBloodType === type && styles.selectedCard, // Highlight when selected
+      ]}
+      onPress={() => handleBloodTypeSelect(type)} // Handle selection
+    >
+      <Icon
+        name="opacity"
+        size={24}
+        color={selectedBloodType === type ? "#fff" : "#aaa"} // Change icon color based on selection
+        style={styles.bloodIcon}
+      />
+      <Text
+        style={[
+          styles.bloodTypeText,
+          selectedBloodType === type && styles.selectedText, // Change text color when selected
+        ]}
+      >
+        {type}
+      </Text>
+    </TouchableOpacity>
+  ))}
+</View>
+
             {errors.bloodType ? <Text style={styles.errorText}>{errors.bloodType}</Text> : null}
           </View>
   

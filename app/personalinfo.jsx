@@ -10,15 +10,14 @@ import { db } from '../firebaseConfig';
 
 export default function PersonalInfoScreen() {
   const [focusedInput, setFocusedInput] = useState(null);
-  const [uid, setuid] = useState('');
   const [fullName, setFullName] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState(new Date());
   const [temporaryDate, setTemporaryDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [contactNo, setContactNo] = useState('');
-  const [city, setCity] = useState('');
-  const [state, setState] = useState('');
-  const [country, setCountry] = useState('');
+  const [cityDistrict, setCityDistrict] = useState('');
+  const [stateProvince, setStateProvince] = useState('');
+  const [countryRegion, setCountryRegion] = useState('');
   const [error, setError] = useState({});
   const navigation = useNavigation();
 
@@ -28,8 +27,15 @@ export default function PersonalInfoScreen() {
         const userDetailsJson = await AsyncStorage.getItem('userDetails');
         if (userDetailsJson) {
           const userDetails = JSON.parse(userDetailsJson);
-          setuid(userDetails.uid);
           setFullName(userDetails.fullName);
+                  // Convert dateOfBirth string back to a Date object
+        if (userDetails.dateOfBirth) {
+          setDateOfBirth(new Date(userDetails.dateOfBirth));
+        }
+          setContactNo(userDetails.contactNo);
+          setCityDistrict(userDetails.cityDistrict);
+          setStateProvince(userDetails.stateProvince);
+          setCountryRegion(userDetails.countryRegion);
         } else {
           console.log('Error', 'No user details found.');
         }
@@ -41,13 +47,20 @@ export default function PersonalInfoScreen() {
     fetchUserDetails();
   }, []);
 
+  console.log(fullName);
+  console.log(dateOfBirth);
+  console.log(contactNo);
+  console.log(stateProvince);
+  console.log(cityDistrict);
+  console.log(countryRegion);
+
   const validateForm = () => {
     const newError = {};
     if (!fullName) newError.fullName = 'Full Name is required';
     if (!contactNo) newError.contactNo = 'Contact Number is required';
-    if (!city) newError.city = 'City is required';
-    if (!state) newError.state = 'State is required';
-    if (!country) newError.country = 'Country is required';
+    if (!cityDistrict) newError.cityDistrict = 'City / District is required';
+    if (!stateProvince) newError.stateProvince = 'State / Province is required';
+    if (!countryRegion) newError.countryRegion = 'Country / Region is required';
     setError(newError);
     return Object.keys(newError).length === 0;
   };
@@ -74,11 +87,11 @@ export default function PersonalInfoScreen() {
             // Update the fields of the user document
             await setDoc(userDocRef, {
               fullName: fullName,
-              dateOfBirth: dateOfBirth.toLocaleDateString('en-GB'),
+              dateOfBirth: dateOfBirth.toISOString(),
               contactNo: contactNo,
-              cityDistrict: city,
-              stateProvince: state,
-              countryRegion: country,
+              cityDistrict: cityDistrict,
+              stateProvince: stateProvince,
+              countryRegion: countryRegion,
             }, { merge: true });
   
             console.log('User details updated successfully');
@@ -220,13 +233,13 @@ export default function PersonalInfoScreen() {
                   style={styles.input}
                   placeholder="City / District"
                   placeholderTextColor={getPlaceholderTextColor('city')}
-                  value={city}
-                  onChangeText={setCity}
+                  value={cityDistrict}
+                  onChangeText={setCityDistrict}
                   onFocus={() => setFocusedInput('city')}
                   onBlur={() => setFocusedInput(null)}
                 />
               </View>
-              {error.city && <Text style={styles.errorText}>{error.city}</Text>}
+              {error.cityDistrict && <Text style={styles.errorText}>{error.cityDistrict}</Text>}
             </View>
 
             {/* State/Province Field */}
@@ -238,13 +251,13 @@ export default function PersonalInfoScreen() {
                   style={styles.input}
                   placeholder="State / Province"
                   placeholderTextColor={getPlaceholderTextColor('state')}
-                  value={state}
-                  onChangeText={setState}
+                  value={stateProvince}
+                  onChangeText={setStateProvince}
                   onFocus={() => setFocusedInput('state')}
                   onBlur={() => setFocusedInput(null)}
                 />
               </View>
-              {error.state && <Text style={styles.errorText}>{error.state}</Text>}
+              {error.stateProvince && <Text style={styles.errorText}>{error.stateProvince}</Text>}
             </View>
 
             {/* Country/Region Field */}
@@ -256,13 +269,13 @@ export default function PersonalInfoScreen() {
                   style={styles.input}
                   placeholder="Country / Region"
                   placeholderTextColor={getPlaceholderTextColor('country')}
-                  value={country}
-                  onChangeText={setCountry}
+                  value={countryRegion}
+                  onChangeText={setCountryRegion}
                   onFocus={() => setFocusedInput('country')}
                   onBlur={() => setFocusedInput(null)}
                 />
               </View>
-              {error.country && <Text style={styles.errorText}>{error.country}</Text>}
+              {error.countryRegion && <Text style={styles.errorText}>{error.countryRegion}</Text>}
             </View>
 
             <View style={styles.buttonContainer}>
