@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView, Pressable, Platform, Image, KeyboardAvoidingView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView, Pressable, Platform, Image, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -20,6 +20,7 @@ export default function PersonalInfoScreen() {
   const [countryRegion, setCountryRegion] = useState('');
   const [error, setError] = useState({});
   const navigation = useNavigation();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const fetchUserDetails = async () => {
@@ -67,6 +68,7 @@ export default function PersonalInfoScreen() {
 
 
   const handleNext = async () => {
+    setLoading(true);
     if (validateForm()) {
       try {
         const auth = getAuth();
@@ -104,6 +106,9 @@ export default function PersonalInfoScreen() {
         }
       } catch (error) {
         console.log('Error saving user details:', error);
+      }
+      finally {
+        setLoading(false);
       }
     }
   };
@@ -287,6 +292,19 @@ export default function PersonalInfoScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      {loading && (
+  <View style={styles.overlayContainer}>
+    <View style={styles.overlay}>
+      <Image
+        source={require('../assets/images/loading.gif')} // Replace with your loading gif path
+        style={styles.loadingGif}
+      />
+      {/* If you still want to include the text, uncomment the line below */}
+      <Text style={styles.loadingText}>Please wait...</Text>
+    </View>
+  </View>
+)}
+
     </SafeAreaView>
   );
 }
@@ -393,5 +411,27 @@ const styles = StyleSheet.create({
     marginLeft: 15,
     marginTop: 5,
 
+  },    overlayContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#fff', // White background
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1, // Ensure it's on top of all other components
+  },
+  overlay: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingGif: {
+    width: 100, // Adjust size based on your gif
+    height: 100,
+  },
+  loadingText: {
+    color: '#004aad',
+    marginTop: 10,
   },
 });

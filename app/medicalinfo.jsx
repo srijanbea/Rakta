@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView, Image, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView, Image, TextInput, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import BouncyCheckbox from 'react-native-bouncy-checkbox';
 import { useNavigation } from 'expo-router';
@@ -9,6 +9,7 @@ import { db } from '../firebaseConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function MedicalInfoScreen() {
+  const [loading, setLoading] = useState(false);
   const [selectedBloodType, setSelectedBloodType] = useState('');
   const [selectedHeight, setSelectedHeight] = useState('170'); // Default height
   const [selectedWeight, setSelectedWeight] = useState('70'); // Default weight
@@ -54,6 +55,7 @@ export default function MedicalInfoScreen() {
   };
 
   const handleNext = async () => {
+    setLoading(true);
     if (validateInputs()) {
       try {
         const auth = getAuth();
@@ -94,6 +96,9 @@ export default function MedicalInfoScreen() {
         }
       } catch (error) {
         console.log('Error saving user details:', error);
+      }
+      finally {
+        setLoading(false);
       }
     }
   };
@@ -322,6 +327,19 @@ export default function MedicalInfoScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      {loading && (
+  <View style={styles.overlayContainer}>
+    <View style={styles.overlay}>
+      <Image
+        source={require('../assets/images/loading.gif')} // Replace with your loading gif path
+        style={styles.loadingGif}
+      />
+      {/* If you still want to include the text, uncomment the line below */}
+      <Text style={styles.loadingText}>Preparing Your Dashboard...</Text>
+    </View>
+  </View>
+)}
+
     </SafeAreaView>
   );
 }
@@ -491,5 +509,28 @@ const styles = StyleSheet.create({
   },
   buttonIcon: {
     marginLeft: 5,
+  },
+  overlayContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#fff', // White background
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1, // Ensure it's on top of all other components
+  },
+  overlay: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingGif: {
+    width: 100, // Adjust size based on your gif
+    height: 100,
+  },
+  loadingText: {
+    color: '#004aad',
+    marginTop: 10,
   },
 });
