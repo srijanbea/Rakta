@@ -36,14 +36,10 @@ export default function DonorProfile() {
 
 
       <View style={styles.infoSection}>
-        <Text style={styles.infoLabel}>Email</Text>
-        <Text style={styles.infoText}>sudeep.poudel@yahoo.com</Text>
         <Text style={styles.infoLabel}>Mobile No.</Text>
         <Text style={styles.infoText}>+977-9811364390</Text>
         <Text style={styles.infoLabel}>Address</Text>
         <Text style={styles.infoText}>Balaju, Kathmandu</Text>
-        <Text style={styles.infoLabel}>Area</Text>
-        <Text style={styles.infoText}>Balaju</Text>
       </View>
 
       <View style={styles.acknowledgeSection}>

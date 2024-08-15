@@ -14,6 +14,18 @@ const screenWidth = Dimensions.get('window').width;
 export default function DashboardScreen() {
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState(new Date());
+  const [contactNo, setContactNo] = useState('');
+  const [cityDistrict, setCityDistrict] = useState('');
+  const [stateProvince, setStateProvince] = useState('');
+  const [countryRegion, setCountryRegion] = useState('');
+  const [bloodGroup, setBloodGroup] = useState('');
+  const [height, setHeight] = useState('');
+  const [weight, setWeight] = useState('');
+  const [totalBloodDonated, setTotalBloodDonated] = useState('');
+  const [totalBloodRequested, setTotalBloodRequested] = useState('');
+
+
   const [chartData, setChartData] = useState({ labels: [], datasets: [{ data: [] }] });
   const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation();
@@ -36,11 +48,30 @@ export default function DashboardScreen() {
         const querySnapshot = await getDocs(userQuery);
         if (!querySnapshot.empty) {
           const userDoc = querySnapshot.docs[0].data();
+          setEmail(userDoc.email);
           setFullName(userDoc.fullName);
+          setDateOfBirth(userDoc.dateOfBirth);
+          setContactNo(userDoc.contactNo);
+          setCityDistrict(userDoc.cityDistrict);
+          setStateProvince(userDoc.stateProvince);
+          setCountryRegion(userDoc.countryRegion);
+          setBloodGroup(userDoc.bloodGroup);
+          setHeight(userDoc.height);
+          setWeight(userDoc.weight);
+          setTotalBloodDonated(userDoc.totalBloodDonated);
+          setTotalBloodRequested(userDoc.totalBloodRequested);
 
           await AsyncStorage.setItem('userDetails', JSON.stringify({
             email: userDoc.email,
             fullName: userDoc.fullName,
+            dateOfBirth: userDoc.dateOfBirth,
+            contactNo: userDoc.contactNo,
+            cityDistrict: userDoc.cityDistrict,
+            stateProvince: userDoc.stateProvince,
+            countryRegion: userDoc.countryRegion,
+            bloodGroup: userDoc.bloodGroup,
+            height: userDoc.height,
+            weight: userDoc.weight,
           }));
         } else {
           console.log('No such document!');
@@ -52,6 +83,19 @@ export default function DashboardScreen() {
       console.log('Error', 'No user is logged in.');
     }
   }, [auth, firestore]);
+
+  console.log(email);
+  console.log(fullName);
+  console.log(dateOfBirth);
+  console.log(contactNo);
+  console.log(cityDistrict);
+  console.log(stateProvince);
+  console.log(countryRegion);
+  console.log(bloodGroup);
+  console.log(height);
+  console.log(weight);
+  console.log(totalBloodDonated);
+  console.log(totalBloodRequested);
 
   const fetchLiveData = useCallback(async () => {
     const today = new Date();
@@ -67,7 +111,6 @@ export default function DashboardScreen() {
   
     try {
       const snapshot = await getDocs(q);
-      console.log('Snapshot Size:', snapshot.size);
   
       const labels = [];
       const dataMap = {};
@@ -106,7 +149,8 @@ export default function DashboardScreen() {
   
       const finalLabels = [...new Set(labels)];
       const finalData = finalLabels.map(label => dataMap[label] || 0);
-  
+      
+      
       console.log('Final Labels:', finalLabels);
       console.log('Final Data:', finalData);
   

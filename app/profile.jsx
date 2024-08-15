@@ -6,13 +6,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import BottomNavBar from './bottomnavbar';
 
 export default function ProfileScreen() {
-  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState(new Date());
+  const [contactNo, setContactNo] = useState('');
+  const [cityDistrict, setCityDistrict] = useState('');
+  const [stateProvince, setStateProvince] = useState('');
+  const [countryRegion, setCountryRegion] = useState('');
   const [bloodGroup, setBloodGroup] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [location, setLocation] = useState('');
-  const [dob, setDob] = useState('');
-  const [lastDonationDate, setLastDonationDate] = useState('');
+  const [height, setHeight] = useState('');
+  const [weight, setWeight] = useState('');
+  const [totalBloodDonated, setTotalBloodDonated] = useState('');
+  const [totalBloodRequested, setTotalBloodRequested] = useState('');
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
 
@@ -22,13 +27,18 @@ export default function ProfileScreen() {
         const userDetailsJson = await AsyncStorage.getItem('userDetails');
         if (userDetailsJson) {
           const userDetails = JSON.parse(userDetailsJson);
-          setFullName(userDetails.fullName);
           setEmail(userDetails.email);
+          setFullName(userDetails.fullName);
+          setDateOfBirth(userDetails.dateOfBirth);
+          setContactNo(userDetails.contactNo);
+          setCityDistrict(userDetails.cityDistrict);
+          setStateProvince(userDetails.stateProvince);
+          setCountryRegion(userDetails.countryRegion);
           setBloodGroup(userDetails.bloodGroup);
-          setPhoneNumber(userDetails.phoneNumber);
-          setLocation(userDetails.location);
-          setDob(userDetails.dob);
-          setLastDonationDate(userDetails.lastDonationDate);
+          setHeight(userDetails.height);
+          setWeight(userDetails.weight);
+          setTotalBloodDonated(userDetails.totalBloodDonated);
+          setTotalBloodRequested(userDetails.totalBloodRequested);
         } else {
           console.log('No user details found.');
         }
@@ -65,40 +75,6 @@ export default function ProfileScreen() {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <View style={styles.profileHeader}>
-          <Image
-            source={{ uri: 'https://scontent.fktm1-1.fna.fbcdn.net/v/t39.30808-6/445161318_747497967588769_1677089034473477694_n.jpg?stp=cp6_dst-jpg&_nc_cat=107&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=p7FhwVnLc_IQ7kNvgFJe7UB&_nc_ht=scontent.fktm1-1.fna&oh=00_AYCUD2-SyAOLFN7vm70Q7aETFgybaONpvREhLAVngDPtmA&oe=66BDF451' }} // Placeholder for profile picture
-            style={styles.profileImage}
-          />
-          <Text style={styles.userName}>{fullName}</Text>
-          <Text style={styles.userDetails}>Blood Group: {bloodGroup}</Text>
-        </View>
-        <View style={styles.infoContainer}>
-          <View style={styles.infoRow}>
-            <Icon name="person" size={20} color="#004aad" />
-            <Text style={styles.details}>{fullName}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Icon name="email" size={20} color="#004aad" />
-            <Text style={styles.details}>{email}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Icon name="phone" size={20} color="#004aad" />
-            <Text style={styles.details}>Phone: {phoneNumber}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Icon name="location-on" size={20} color="#004aad" />
-            <Text style={styles.details}>Location: {location}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Icon name="calendar-today" size={20} color="#004aad" />
-            <Text style={styles.details}>DOB: {dob}</Text>
-          </View>
-          <View style={styles.infoRow}>
-            <Icon name="history" size={20} color="#004aad" />
-            <Text style={styles.details}>Last Donation: {lastDonationDate}</Text>
-          </View>
-        </View>
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
           <Icon name="logout" size={20} color="#fff" />
           <Text style={styles.logoutText}>Logout</Text>

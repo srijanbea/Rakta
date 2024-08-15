@@ -89,6 +89,8 @@ export default function SignUpScreen() {
                     registrationTimestamp: new Date().toISOString(),
                     currentLatitude: '',
                     currentLongitude: '',
+                    totalBloodDonated: 0,
+                    totalBloodRequested: 0,
                 });
 
                 Alert.alert(
