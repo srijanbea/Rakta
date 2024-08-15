@@ -1,24 +1,15 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Image, ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Switch, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 import BottomNavBar from './bottomnavbar';
 
 export default function ProfileScreen() {
-  const [email, setEmail] = useState('');
+  const [isAvailableToDonate, setIsAvailableToDonate] = useState(false);
   const [fullName, setFullName] = useState('');
-  const [dateOfBirth, setDateOfBirth] = useState(new Date());
-  const [contactNo, setContactNo] = useState('');
-  const [cityDistrict, setCityDistrict] = useState('');
-  const [stateProvince, setStateProvince] = useState('');
-  const [countryRegion, setCountryRegion] = useState('');
-  const [bloodGroup, setBloodGroup] = useState('');
-  const [height, setHeight] = useState('');
-  const [weight, setWeight] = useState('');
-  const [totalBloodDonated, setTotalBloodDonated] = useState('');
-  const [totalBloodRequested, setTotalBloodRequested] = useState('');
+  const [profilePic, setProfilePic] = useState(null);
   const [loading, setLoading] = useState(true);
+
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -27,20 +18,9 @@ export default function ProfileScreen() {
         const userDetailsJson = await AsyncStorage.getItem('userDetails');
         if (userDetailsJson) {
           const userDetails = JSON.parse(userDetailsJson);
-          setEmail(userDetails.email);
           setFullName(userDetails.fullName);
-          setDateOfBirth(userDetails.dateOfBirth);
-          setContactNo(userDetails.contactNo);
-          setCityDistrict(userDetails.cityDistrict);
-          setStateProvince(userDetails.stateProvince);
-          setCountryRegion(userDetails.countryRegion);
-          setBloodGroup(userDetails.bloodGroup);
-          setHeight(userDetails.height);
-          setWeight(userDetails.weight);
-          setTotalBloodDonated(userDetails.totalBloodDonated);
-          setTotalBloodRequested(userDetails.totalBloodRequested);
-        } else {
-          console.log('No user details found.');
+          setProfilePic(userDetails.profilePic); // Assuming profilePic is stored in AsyncStorage
+          setIsAvailableToDonate(userDetails.isAvailableToDonate);
         }
       } catch (error) {
         console.error('Error retrieving user details:', error);
@@ -52,22 +32,26 @@ export default function ProfileScreen() {
     fetchUserDetails();
   }, []);
 
-  const handleLogout = async () => {
+  const toggleAvailableToDonate = async () => {
     try {
-      await AsyncStorage.removeItem('userDetails');
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'login' }],
-      });
+      setIsAvailableToDonate(!isAvailableToDonate);
+      await AsyncStorage.setItem(
+        'userDetails',
+        JSON.stringify({
+          fullName,
+          profilePic,
+          isAvailableToDonate: !isAvailableToDonate,
+        })
+      );
     } catch (error) {
-      console.error('Error logging out:', error);
+      console.error('Error updating availability:', error);
     }
   };
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#004aad" />
+        <Text>Loading...</Text>
       </View>
     );
   }
@@ -75,11 +59,27 @@ export default function ProfileScreen() {
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Icon name="logout" size={20} color="#fff" />
-          <Text style={styles.logoutText}>Logout</Text>
-        </TouchableOpacity>
+        <View style={styles.profileHeader}>
+          <Image
+            source={profilePic ? { uri: profilePic } : require('../assets/images/user-placeholder.png')}
+            style={styles.profileImage}
+          />
+          <Text style={styles.userName}>{fullName}</Text>
+        </View>
+
+        <View style={styles.infoContainer}>
+          <View style={styles.switchContainer}>
+            <Text style={styles.switchLabel}>Available to Donate</Text>
+            <Switch
+              value={isAvailableToDonate}
+              onValueChange={toggleAvailableToDonate}
+              trackColor={{ false: '#767577', true: '#004aad' }}
+              thumbColor={isAvailableToDonate ? '#004aad' : '#f4f3f4'}
+            />
+          </View>
+        </View>
       </ScrollView>
+
       <BottomNavBar activeScreen="profile" />
     </View>
   );
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   },
   profileHeader: {
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingVertical: 30,
     backgroundColor: '#004aad',
     borderRadius: 12,
     shadowColor: '#000',
@@ -119,10 +119,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginBottom: 5,
   },
-  userDetails: {
-    fontSize: 16,
-    color: '#dbe1e8',
-  },
   infoContainer: {
     backgroundColor: '#fff',
     borderRadius: 12,
@@ -134,31 +130,14 @@ const styles = StyleSheet.create({
     elevation: 5,
     marginBottom: 30,
   },
-  infoRow: {
+  switchContainer: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 15,
   },
-  details: {
-    fontSize: 16,
-    marginLeft: 10,
+  switchLabel: {
+    fontSize: 18,
     color: '#333',
-  },
-  logoutButton: {
-    backgroundColor: '#004aad',
-    borderRadius: 12,
-    paddingVertical: 15,
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginHorizontal: 20,
-    elevation: 5,
-  },
-  logoutText: {
-    fontSize: 16,
-    color: '#fff',
-    marginLeft: 10,
-    fontWeight: '600',
   },
   loadingContainer: {
     flex: 1,
