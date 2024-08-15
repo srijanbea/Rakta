@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Switch, ScrollView } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
+import React, {useEffect, useState} from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from 'expo-router';
 import BottomNavBar from './bottomnavbar';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function ProfileScreen() {
-  const [isAvailableToDonate, setIsAvailableToDonate] = useState(false);
   const [fullName, setFullName] = useState('');
-  const [profilePic, setProfilePic] = useState(null);
+  const [email, setEmail] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [bloodGroup, setBloodGroup] = useState('');
+  const [totalBloodDonated, setTotalBloodDonated] = useState('');
   const [loading, setLoading] = useState(true);
-
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -19,11 +21,16 @@ export default function ProfileScreen() {
         if (userDetailsJson) {
           const userDetails = JSON.parse(userDetailsJson);
           setFullName(userDetails.fullName);
-          setProfilePic(userDetails.profilePic); // Assuming profilePic is stored in AsyncStorage
-          setIsAvailableToDonate(userDetails.isAvailableToDonate);
+          setEmail(userDetails.email);
+          setDateOfBirth(userDetails.dateOfBirth);
+          setBloodGroup(userDetails.bloodGroup);
+          setTotalBloodDonated(userDetails.totalBloodDonated);
+          set
+        } else {
+          console.log('Error', 'No user details found.');
         }
       } catch (error) {
-        console.error('Error retrieving user details:', error);
+        console.log('Error retrieving user details:', error);
       } finally {
         setLoading(false);
       }
@@ -32,54 +39,63 @@ export default function ProfileScreen() {
     fetchUserDetails();
   }, []);
 
-  const toggleAvailableToDonate = async () => {
+  const handleLogout = async () => {
     try {
-      setIsAvailableToDonate(!isAvailableToDonate);
-      await AsyncStorage.setItem(
-        'userDetails',
-        JSON.stringify({
-          fullName,
-          profilePic,
-          isAvailableToDonate: !isAvailableToDonate,
-        })
-      );
+      await AsyncStorage.removeItem('userDetails');
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'login' }],
+      });
     } catch (error) {
-      console.error('Error updating availability:', error);
+      console.log('Error logging out:', error);
     }
   };
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <Text>Loading...</Text>
+        <ActivityIndicator size="large" color="#004aad" />
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollViewContent}>
-        <View style={styles.profileHeader}>
-          <Image
-            source={profilePic ? { uri: profilePic } : require('../assets/images/user-placeholder.png')}
-            style={styles.profileImage}
-          />
-          <Text style={styles.userName}>{fullName}</Text>
-        </View>
-
-        <View style={styles.infoContainer}>
-          <View style={styles.switchContainer}>
-            <Text style={styles.switchLabel}>Available to Donate</Text>
-            <Switch
-              value={isAvailableToDonate}
-              onValueChange={toggleAvailableToDonate}
-              trackColor={{ false: '#767577', true: '#004aad' }}
-              thumbColor={isAvailableToDonate ? '#004aad' : '#f4f3f4'}
-            />
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
+        <View style={styles.header}>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerText}>{fullName}</Text>
+            <TouchableOpacity style={styles.editButton}>
+              <Icon name="edit" size={8} color="#004aad" />
+              <Text style={styles.editButtonText}>Edit Profile</Text>
+            </TouchableOpacity>
           </View>
         </View>
-      </ScrollView>
 
+        <View style={styles.profileSection}>
+          <Image source={require('../assets/images/placeholder.jpg')} style={styles.profileImage} />
+          <View style={styles.profileDetails}>
+            <Text style={styles.profileName}>{dateOfBirth}</Text>
+            <View style={styles.profileDescription}>
+              <View style={styles.leftInfoColumn}>
+                <Text style={styles.profileLabel}>Blood Group</Text>
+                <Text style={styles.profileValue}>{bloodGroup}</Text>
+              </View>
+              <View style={styles.rightInfoColumn}>
+                <Text style={styles.profileLabel}>Donations</Text>
+                <Text style={styles.profileValue}>{totalBloodDonated}</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.logoutWrapper}>
+          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <Icon name="logout" size={24} color="#fff" />
+            <Text style={styles.logoutText}>Logout</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
       <BottomNavBar activeScreen="profile" />
     </View>
   );
@@ -90,59 +106,112 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f7f7f7',
   },
-  scrollViewContent: {
+  scrollContainer: {
+    flex: 1,
+    paddingBottom: 20, // Adjust padding if needed
+  },
+  header: {
+    backgroundColor: '#004aad',
     padding: 20,
   },
-  profileHeader: {
+  headerTextContainer: {
+    alignItems: 'flex-end',
+  },
+  headerText: {
+    color: '#fff',
+    fontSize: 25,
+    fontWeight: 'bold',
+  },
+  editButton: {
+    flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 30,
-    backgroundColor: '#004aad',
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
-    marginBottom: 20,
+    backgroundColor: '#fff',
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    borderRadius: 25,
+    marginTop: 10,
+  },
+  editButtonText: {
+    color: '#004aad',
+    marginLeft: 5,
+    fontSize: 8,
+  },
+  profileSection: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    position: 'relative',
   },
   profileImage: {
-    width: 120,
-    height: 120,
+    width: 110,
+    height: 110,
     borderRadius: 60,
-    marginBottom: 10,
+    position: 'absolute',
+    top: -60,
+    left: 20,
     borderWidth: 4,
-    borderColor: '#fff',
+    borderColor: '#FFF',
   },
-  userName: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#fff',
-    marginBottom: 5,
+  profileDetails: {
+    flex: 1,
   },
-  infoContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
-    marginBottom: 30,
-  },
-  switchContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  switchLabel: {
+  profileName: {
+    marginLeft: 140,
     fontSize: 18,
+    fontWeight: 'bold',
     color: '#333',
+  },
+  profileDescription: {
+    flexDirection: 'row',
+    marginTop: 10,
+    marginBottom: 35,
+  },
+  rightInfoColumn: {
+    position: 'absolute',
+    marginLeft: 259,
+  },
+  leftInfoColumn: {
+    position: 'absolute',
+    marginLeft: 141,
+  },
+  profileLabel: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    color: '#666',
+    textAlign: 'center',
+  },
+  profileValue: {
+    fontSize: 16,
+    color: '#333',
+    textAlign: 'left',
+    fontWeight: 'bold',
+  },
+  logoutWrapper: {
+    alignItems: 'center',
+    marginBottom: 75,
+  },
+  logoutButton: {
+    padding: 16,
+    backgroundColor: '#004aad',
+    borderRadius: 8,
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    width: '80%',
+  },
+  logoutText: {
+    fontSize: 18,
+    color: '#fff',
+    marginLeft: 8,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f7f7f7',
   },
 });
+

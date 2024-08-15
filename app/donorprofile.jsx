@@ -17,7 +17,7 @@ export default function DonorProfile() {
       </View>
 
       <View style={styles.profileSection}>
-  <Image source={require('../assets/images/user-placeholder.png')} style={styles.profileImage} />
+  <Image source={require('../assets/images/placeholder.jpg')} style={styles.profileImage} />
   <View style={styles.profileDetails}>
     <Text style={styles.profileName}>Sudeep Poudel</Text>
     <View style={styles.profileDescription}>

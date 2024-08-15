@@ -12,6 +12,7 @@ import { format } from 'date-fns';
 const screenWidth = Dimensions.get('window').width;
 
 export default function DashboardScreen() {
+  const [uid, setUid] = useState('');
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState(new Date());
@@ -24,6 +25,7 @@ export default function DashboardScreen() {
   const [weight, setWeight] = useState('');
   const [totalBloodDonated, setTotalBloodDonated] = useState('');
   const [totalBloodRequested, setTotalBloodRequested] = useState('');
+  const [profilePicture, setProfilePicture] = useState('');
 
 
   const [chartData, setChartData] = useState({ labels: [], datasets: [{ data: [] }] });
@@ -48,6 +50,7 @@ export default function DashboardScreen() {
         const querySnapshot = await getDocs(userQuery);
         if (!querySnapshot.empty) {
           const userDoc = querySnapshot.docs[0].data();
+          setUid(userDoc.uid);
           setEmail(userDoc.email);
           setFullName(userDoc.fullName);
           setDateOfBirth(userDoc.dateOfBirth);
@@ -60,8 +63,10 @@ export default function DashboardScreen() {
           setWeight(userDoc.weight);
           setTotalBloodDonated(userDoc.totalBloodDonated);
           setTotalBloodRequested(userDoc.totalBloodRequested);
+          setProfilePicture(userDoc.profilePicture);
 
           await AsyncStorage.setItem('userDetails', JSON.stringify({
+            uid: userDoc.uid,
             email: userDoc.email,
             fullName: userDoc.fullName,
             dateOfBirth: userDoc.dateOfBirth,
@@ -72,6 +77,7 @@ export default function DashboardScreen() {
             bloodGroup: userDoc.bloodGroup,
             height: userDoc.height,
             weight: userDoc.weight,
+            profilePicture: userDoc.profilePicture,
           }));
         } else {
           console.log('No such document!');
