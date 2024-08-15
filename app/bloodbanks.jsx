@@ -54,11 +54,6 @@ export default function BloodBanksScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.titleBar}>
-        <TouchableOpacity onPress={navigateToNotifications}>
-          <Icon name="notifications" size={25} color="#fff" />
-        </TouchableOpacity>
-      </View>
       <View style={styles.header}>
       <Image source={require('../assets/images/blood-bag.png')} style={styles.logo} />
         <Text style={styles.headerText}>Blood Banks Section</Text>

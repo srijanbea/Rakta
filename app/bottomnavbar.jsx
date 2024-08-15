@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, Dimensions, Text, TouchableOpacity } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 import { useNavigation } from 'expo-router';
 
 const { width } = Dimensions.get('window');
@@ -24,25 +24,25 @@ const BottomNavBar = ({ activeScreen }) => {
     <View style={styles.container}>
       <View style={styles.iconContainer}>
         <TouchableOpacity onPress={navigateToHome} style={styles.iconWrapper} accessibilityLabel="Home">
-          <Icon 
+          <AntDesign 
             name="home" 
-            size={30} 
+            size={25} 
             color={activeScreen === 'dashboard' ? "#004aad" : "#777"} 
           />
           <Text style={[styles.label, { color: activeScreen === 'dashboard' ? "#004aad" : "#777" }]}>Home</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={navigateToBloodBanks} style={styles.iconWrapper} accessibilityLabel="Blood Banks">
-          <Icon 
-            name="local-hospital" 
-            size={30} 
+          <AntDesign 
+            name="medicinebox" 
+            size={25} 
             color={activeScreen === 'bloodbanks' ? "#004aad" : "#777"} 
           />
           <Text style={[styles.label, { color: activeScreen === 'bloodbanks' ? "#004aad" : "#777" }]}>Blood Banks</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={navigateToProfile} style={styles.iconWrapper} accessibilityLabel="Profile">
-          <Icon 
-            name="person" 
-            size={30} 
+          <AntDesign 
+            name="user" 
+            size={25} 
             color={activeScreen === 'profile' ? "#004aad" : "#777"} 
           />
           <Text style={[styles.label, { color: activeScreen === 'profile' ? "#004aad" : "#777" }]}>Profile</Text>
