@@ -1,9 +1,14 @@
-import React, {useEffect, useState} from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator, Switch } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from 'expo-router';
 import BottomNavBar from './bottomnavbar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as ImagePicker from 'expo-image-picker';
+import { getAuth } from 'firebase/auth';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { doc, collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
+import { storage, db } from '../firebaseConfig'; // Import firebase configuration
 
 export default function ProfileScreen() {
   const [fullName, setFullName] = useState('');
@@ -11,7 +16,10 @@ export default function ProfileScreen() {
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [bloodGroup, setBloodGroup] = useState('');
   const [totalBloodDonated, setTotalBloodDonated] = useState('');
+  const [profilePicture, setProfilePicture] = useState('');
   const [loading, setLoading] = useState(true);
+  const [loadingProfilePicture, setLoadingProfilePicture] = useState(false); // New state for loading
+  const [availableToDonate, setAvailableToDonate] = useState(false); // New state for availability
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -22,10 +30,18 @@ export default function ProfileScreen() {
           const userDetails = JSON.parse(userDetailsJson);
           setFullName(userDetails.fullName);
           setEmail(userDetails.email);
-          setDateOfBirth(userDetails.dateOfBirth);
+  
+          const dob = new Date(userDetails.dateOfBirth);
+          const age = new Date().getFullYear() - dob.getFullYear();
+          setDateOfBirth(age + " yrs");
           setBloodGroup(userDetails.bloodGroup);
           setTotalBloodDonated(userDetails.totalBloodDonated);
-          set
+          setAvailableToDonate(userDetails.availableToDonate || false); // Load availability status
+  
+          // Only update profile picture if the URL has changed
+          if (userDetails.profilePicture !== profilePicture) {
+            setProfilePicture(userDetails.profilePicture || '');
+          }
         } else {
           console.log('Error', 'No user details found.');
         }
@@ -35,9 +51,9 @@ export default function ProfileScreen() {
         setLoading(false);
       }
     };
-
+  
     fetchUserDetails();
-  }, []);
+  }, [profilePicture]); // This dependency might cause issues, remove if unnecessary
 
   const handleLogout = async () => {
     try {
@@ -49,6 +65,75 @@ export default function ProfileScreen() {
     } catch (error) {
       console.log('Error logging out:', error);
     }
+  };
+
+  const handleUpdateProfilePicture = async () => {
+    setLoadingProfilePicture(true); // Show loading indicator
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+  
+    if (!result.canceled) {
+      const { uri } = result.assets[0];
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      
+      const auth = getAuth();
+      const user = auth.currentUser;
+  
+      if (user) {
+        const email = user.email;
+  
+        // Reference to Firebase Storage
+        const storageRef = ref(storage, `profilePictures/${user.uid}`);
+  
+        try {
+          // Upload profile picture to Firebase Storage
+          await uploadBytes(storageRef, blob);
+          const downloadURL = await getDownloadURL(storageRef);
+  
+          // Update AsyncStorage
+          const userDetailsJson = await AsyncStorage.getItem('userDetails');
+          const userDetails = JSON.parse(userDetailsJson);
+          userDetails.profilePicture = downloadURL;
+          await AsyncStorage.setItem('userDetails', JSON.stringify(userDetails));
+          
+          // Update Firestore
+          const usersCollection = collection(db, 'users');
+          const userQuery = query(usersCollection, where('email', '==', email));
+          const querySnapshot = await getDocs(userQuery);
+  
+          if (!querySnapshot.empty) {
+            const userDoc = querySnapshot.docs[0]; // Get the first document
+            const userDocRef = doc(db, 'users', userDoc.id); // Get the reference to the document
+  
+            // Update the profilePicture field
+            await updateDoc(userDocRef, { profilePicture: downloadURL });
+  
+            // Update local state
+            setProfilePicture(downloadURL);
+          } else {
+            console.error('No user document found with this email.');
+          }
+        } catch (error) {
+          console.error('Error uploading profile picture:', error);
+        } finally {
+          setLoadingProfilePicture(false); // Hide loading indicator
+        }
+      } else {
+        console.error('No user is signed in.');
+        setLoadingProfilePicture(false); // Hide loading indicator
+      }
+    } else {
+      setLoadingProfilePicture(false); // Hide loading indicator if user cancels
+    }
+  };
+
+  const handleToggleAvailability = () => {
+    setAvailableToDonate(prevState => !prevState);
   };
 
   if (loading) {
@@ -65,17 +150,22 @@ export default function ProfileScreen() {
         <View style={styles.header}>
           <View style={styles.headerTextContainer}>
             <Text style={styles.headerText}>{fullName}</Text>
-            <TouchableOpacity style={styles.editButton}>
+            <TouchableOpacity style={styles.editButton} onPress={handleUpdateProfilePicture}>
               <Icon name="edit" size={8} color="#004aad" />
-              <Text style={styles.editButtonText}>Edit Profile</Text>
+              <Text style={styles.editButtonText}>Update Profile Picture</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         <View style={styles.profileSection}>
-          <Image source={require('../assets/images/placeholder.jpg')} style={styles.profileImage} />
+          <View style={styles.profileImageWrapper}>
+            <Image 
+              source={profilePicture ? { uri: profilePicture } : require('../assets/images/placeholder.jpg')} 
+              style={styles.profileImage} 
+            />
+          </View>
           <View style={styles.profileDetails}>
-            <Text style={styles.profileName}>{dateOfBirth}</Text>
+            <Text style={styles.age}>{dateOfBirth}</Text>
             <View style={styles.profileDescription}>
               <View style={styles.leftInfoColumn}>
                 <Text style={styles.profileLabel}>Blood Group</Text>
@@ -86,6 +176,17 @@ export default function ProfileScreen() {
                 <Text style={styles.profileValue}>{totalBloodDonated}</Text>
               </View>
             </View>
+            <View style={styles.availabilityContainer}>
+  <Text style={styles.availabilityLabel}>I am currently available to donate</Text>
+  <Switch
+    value={availableToDonate}
+    onValueChange={handleToggleAvailability}
+    trackColor={{ true: '#004aad', false: '#ccc' }}
+    thumbColor={availableToDonate ? '#fff' : '#888'}
+    style={styles.switch}
+  />
+</View>
+
           </View>
         </View>
 
@@ -96,6 +197,14 @@ export default function ProfileScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
+      
+      {/* Transparent loading overlay */}
+      {loadingProfilePicture && (
+        <View style={styles.overlay}>
+          <ActivityIndicator size="large" color="#004aad" />
+        </View>
+      )}
+
       <BottomNavBar activeScreen="profile" />
     </View>
   );
@@ -108,7 +217,7 @@ const styles = StyleSheet.create({
   },
   scrollContainer: {
     flex: 1,
-    paddingBottom: 20, // Adjust padding if needed
+    paddingBottom: 20,
   },
   header: {
     backgroundColor: '#004aad',
@@ -146,21 +255,25 @@ const styles = StyleSheet.create({
     borderBottomColor: '#ddd',
     position: 'relative',
   },
+  profileImageWrapper: {
+    position: 'absolute',
+    top: -60,
+    left: 20,
+    zIndex: 1, // Ensure the image is above other elements
+  },
   profileImage: {
     width: 110,
     height: 110,
     borderRadius: 60,
-    position: 'absolute',
-    top: -60,
-    left: 20,
     borderWidth: 4,
     borderColor: '#FFF',
+    backgroundColor: '#FFF'
   },
   profileDetails: {
     flex: 1,
+    marginLeft: 140, // Adjust margin to accommodate the profile image
   },
-  profileName: {
-    marginLeft: 140,
+  age: {
     fontSize: 18,
     fontWeight: 'bold',
     color: '#333',
@@ -168,15 +281,13 @@ const styles = StyleSheet.create({
   profileDescription: {
     flexDirection: 'row',
     marginTop: 10,
-    marginBottom: 35,
+    marginBottom: 15,
   },
   rightInfoColumn: {
-    position: 'absolute',
-    marginLeft: 259,
+    marginLeft: 'auto', // Align to the right
   },
   leftInfoColumn: {
-    position: 'absolute',
-    marginLeft: 141,
+    marginRight: 'auto', // Align to the left
   },
   profileLabel: {
     fontSize: 10,
@@ -189,6 +300,20 @@ const styles = StyleSheet.create({
     color: '#333',
     textAlign: 'left',
     fontWeight: 'bold',
+  },
+  availabilityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 15,
+  },
+  availabilityLabel: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: 'bold',
+    flex: 1,
+  },
+  switch: {
+    marginLeft: 10,
   },
   logoutWrapper: {
     alignItems: 'center',
@@ -213,5 +338,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
-
