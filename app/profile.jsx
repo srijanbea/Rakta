@@ -19,7 +19,7 @@ export default function ProfileScreen() {
   const [profilePicture, setProfilePicture] = useState('');
   const [loading, setLoading] = useState(true);
   const [loadingProfilePicture, setLoadingProfilePicture] = useState(false); // New state for loading
-  const [availableToDonate, setAvailableToDonate] = useState(false); // New state for availability
+  const [availableToDonate, setAvailableToDonate] = useState(''); // New state for availability
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -132,9 +132,50 @@ export default function ProfileScreen() {
     }
   };
 
-  const handleToggleAvailability = () => {
-    setAvailableToDonate(prevState => !prevState);
+  const handleToggleAvailability = async () => {
+    try {
+      // Toggle the state
+      const newAvailability = !availableToDonate;
+      console.log('Toggling availability to:', newAvailability); // Add this line for debugging
+      setAvailableToDonate(newAvailability);
+      
+      // Update AsyncStorage
+      const userDetailsJson = await AsyncStorage.getItem('userDetails');
+      const userDetails = JSON.parse(userDetailsJson);
+      userDetails.availableToDonate = newAvailability;
+      await AsyncStorage.setItem('userDetails', JSON.stringify(userDetails));
+    
+      // Get current user email
+      const auth = getAuth();
+      const user = auth.currentUser;
+  
+      if (user) {
+        const email = user.email;
+  
+        // Update Firestore
+        const usersCollection = collection(db, 'users');
+        const userQuery = query(usersCollection, where('email', '==', email));
+        const querySnapshot = await getDocs(userQuery);
+  
+        if (!querySnapshot.empty) {
+          const userDoc = querySnapshot.docs[0]; // Get the first document
+          const userDocRef = doc(db, 'users', userDoc.id); // Get the reference to the document
+          
+          // Update the availableToDonate field
+          await updateDoc(userDocRef, { availableToDonate: newAvailability });
+          console.log('Updated Firestore with availability:', newAvailability); // Add this line for debugging
+        } else {
+          console.error('No user document found with this email.');
+        }
+      } else {
+        console.error('No user is signed in.');
+      }
+    } catch (error) {
+      console.error('Error updating availability:', error);
+    }
   };
+  
+  
 
   if (loading) {
     return (
@@ -176,18 +217,19 @@ export default function ProfileScreen() {
                 <Text style={styles.profileValue}>{totalBloodDonated}</Text>
               </View>
             </View>
-            <View style={styles.availabilityContainer}>
-  <Text style={styles.availabilityLabel}>I am currently available to donate</Text>
-  <Switch
-    value={availableToDonate}
-    onValueChange={handleToggleAvailability}
-    trackColor={{ true: '#004aad', false: '#ccc' }}
-    thumbColor={availableToDonate ? '#fff' : '#888'}
-    style={styles.switch}
-  />
-</View>
-
           </View>
+        </View>
+
+        {/* New container for availability toggle */}
+        <View style={styles.availabilityContainer}>
+          <Text style={styles.availabilityLabel}>I am currently available to donate</Text>
+          <Switch
+            value={availableToDonate}
+            onValueChange={handleToggleAvailability}
+            trackColor={{ true: '#004aad', false: '#fff' }}
+            thumbColor={availableToDonate ? '#fff' : '#fff'}
+            style={styles.switch}
+          />
         </View>
 
         <View style={styles.logoutWrapper}>
@@ -251,9 +293,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     paddingHorizontal: 20,
     paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
     position: 'relative',
+    borderRadius: 20
   },
   profileImageWrapper: {
     position: 'absolute',
@@ -302,14 +343,29 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   availabilityContainer: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    marginTop: 10,
+    marginBottom: 10,
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 15,
+    borderRadius: 10, // Rounded corners for the card
+    shadowColor: '#000', // Shadow for the card effect
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3, // For Android shadow effect
+    maxWidth: '95%', // Card width less than full width
+    alignSelf: 'center', // Center the card horizontally
   },
+  
   availabilityLabel: {
     fontSize: 16,
     color: '#333',
-    fontWeight: 'bold',
+    fontWeight: 'normal',
     flex: 1,
   },
   switch: {
