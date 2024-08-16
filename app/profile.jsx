@@ -14,6 +14,7 @@ export default function ProfileScreen() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [dateOfBirth, setDateOfBirth] = useState('');
+  const [countryRegion, setCountryRegion] = useState('');
   const [bloodGroup, setBloodGroup] = useState('');
   const [totalBloodDonated, setTotalBloodDonated] = useState('');
   const [profilePicture, setProfilePicture] = useState('');
@@ -38,10 +39,12 @@ export default function ProfileScreen() {
           const userDetails = JSON.parse(userDetailsJson);
           setFullName(userDetails.fullName);
           setEmail(userDetails.email);
+
   
           const dob = new Date(userDetails.dateOfBirth);
           const age = new Date().getFullYear() - dob.getFullYear();
           setDateOfBirth(age + " yrs");
+          setCountryRegion(userDetails.countryRegion);
           setBloodGroup(userDetails.bloodGroup);
           setTotalBloodDonated(userDetails.totalBloodDonated);
           setAvailableToDonate(userDetails.availableToDonate || false); // Load availability status
@@ -222,7 +225,8 @@ export default function ProfileScreen() {
             />
           </View>
           <View style={styles.profileDetails}>
-            <Text style={styles.age}>{dateOfBirth}</Text>
+            <Text style={styles.age}>{dateOfBirth}<Text style={styles.countryRegion}>  {countryRegion}</Text>
+            </Text>
             <View style={styles.profileDescription}>
               <View style={styles.leftInfoColumn}>
                 <Text style={styles.profileLabel}>Blood Group</Text>
@@ -305,7 +309,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     color: '#fff',
-    fontSize: 25,
+    fontSize: 30,
     fontWeight: 'bold',
   },
   editButton: {
@@ -465,5 +469,10 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  countryRegion: {
+    fontSize: 8,
+    color: '#333',
+    fontWeight: 'normal',
   },
 });
