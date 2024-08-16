@@ -26,6 +26,7 @@ export default function DashboardScreen() {
   const [totalBloodDonated, setTotalBloodDonated] = useState('');
   const [totalBloodRequested, setTotalBloodRequested] = useState('');
   const [profilePicture, setProfilePicture] = useState('');
+  const [availableToDonate, setAvailableToDonate] = useState('');
 
 
   const [chartData, setChartData] = useState({ labels: [], datasets: [{ data: [] }] });
@@ -64,6 +65,7 @@ export default function DashboardScreen() {
           setTotalBloodDonated(userDoc.totalBloodDonated);
           setTotalBloodRequested(userDoc.totalBloodRequested);
           setProfilePicture(userDoc.profilePicture);
+          setAvailableToDonate(userDoc.availableToDonate);
 
           await AsyncStorage.setItem('userDetails', JSON.stringify({
             uid: userDoc.uid,
@@ -77,7 +79,10 @@ export default function DashboardScreen() {
             bloodGroup: userDoc.bloodGroup,
             height: userDoc.height,
             weight: userDoc.weight,
+            totalBloodDonated: userDoc.totalBloodDonated,
+            totalBloodRequested: userDoc.totalBloodRequested,
             profilePicture: userDoc.profilePicture,
+            availableToDonate: userDoc.availableToDonate,
           }));
         } else {
           console.log('No such document!');

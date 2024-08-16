@@ -91,6 +91,7 @@ export default function SignUpScreen() {
                     currentLongitude: '',
                     totalBloodDonated: 0,
                     totalBloodRequested: 0,
+                    availableToDonate: false,
                 });
 
                 Alert.alert(
