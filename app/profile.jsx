@@ -22,6 +22,14 @@ export default function ProfileScreen() {
   const [availableToDonate, setAvailableToDonate] = useState(''); // New state for availability
   const navigation = useNavigation();
 
+  const handleNavigateToUpdateProfileInfo = () => {
+    navigation.navigate('updateprofileinfo');
+  };
+
+  const handleNavigateToUpdateMedicalInfo = () => {
+    navigation.navigate('updatemedicalinfo');
+  };
+
   useEffect(() => {
     const fetchUserDetails = async () => {
       try {
@@ -174,6 +182,14 @@ export default function ProfileScreen() {
       console.error('Error updating availability:', error);
     }
   };
+
+  const handleNavigateToPrivacyPolicy = () => {
+    // Navigation logic here
+  };
+
+  const handleNavigateToContactUs = () => {
+    // Navigation logic here
+  };
   
   
 
@@ -231,6 +247,25 @@ export default function ProfileScreen() {
             style={styles.switch}
           />
         </View>
+        <View style={styles.cardsContainer}>
+  <TouchableOpacity style={styles.card} onPress={handleNavigateToUpdateProfileInfo}>
+    <Icon name="person" size={25} color="#004aad" style={styles.cardIcon} />
+    <Text style={styles.cardTitle}>My Personal Information</Text>
+  </TouchableOpacity>
+  <TouchableOpacity style={styles.card} onPress={handleNavigateToUpdateMedicalInfo}>
+    <Icon name="health-and-safety" size={25} color="#004aad" style={styles.cardIcon} />
+    <Text style={styles.cardTitle}>My Medical Information</Text>
+  </TouchableOpacity>
+  <TouchableOpacity style={styles.card} onPress={handleNavigateToPrivacyPolicy}>
+          <Icon name="policy" size={25} color="#004aad" style={styles.cardIcon} />
+          <Text style={styles.cardTitle}>Privacy Policy</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.card} onPress={handleNavigateToContactUs}>
+          <Icon name="contact-support" size={25} color="#004aad" style={styles.cardIcon} />
+          <Text style={styles.cardTitle}>Contact Us</Text>
+        </TouchableOpacity>
+</View>
+
 
         <View style={styles.logoutWrapper}>
           <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
@@ -370,6 +405,37 @@ const styles = StyleSheet.create({
   },
   switch: {
     marginLeft: 10,
+  },
+  cardsContainer: {
+    marginBottom: 20,
+  },
+  card: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3,
+    maxWidth: '95%',
+    alignSelf: 'center',
+    marginBottom: 10,
+    height: 60
+  },
+  cardTitle: {
+    fontSize: 16,
+    color: '#004aad',
+    fontWeight: 'normal',
+    flex: 1,
+  },
+  cardIcon: {
+    marginRight: 20,
   },
   logoutWrapper: {
     alignItems: 'center',

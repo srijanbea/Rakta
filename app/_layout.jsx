@@ -59,6 +59,12 @@ export default function RootLayout() {
       <Stack.Screen name="notifications" options={{
         header: () => <CustomHeader title="" />,
       }} />
+            <Stack.Screen name="updateprofileinfo" options={{
+        header: () => <CustomHeader title="Back" />,
+      }} />
+            <Stack.Screen name="updatemedicalinfo" options={{
+        header: () => <CustomHeader title="Back" />,
+      }} />
     </Stack>
   );
 }
