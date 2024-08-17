@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView, Pressable, Platform, Image, KeyboardAvoidingView, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, SafeAreaView, Pressable, Platform, Image, KeyboardAvoidingView, ActivityIndicator, RefreshControl } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -96,6 +96,24 @@ export default function PersonalInfoScreen() {
               countryRegion: countryRegion,
             }, { merge: true });
   
+            // Retrieve existing AsyncStorage data and merge with new data
+            const existingDataJson = await AsyncStorage.getItem('userDetails');
+            let existingData = existingDataJson ? JSON.parse(existingDataJson) : {};
+  
+            // Merge the new data with existing data
+            const updatedData = {
+              ...existingData,
+              fullName: fullName,
+              dateOfBirth: dateOfBirth.toISOString(),
+              contactNo: contactNo,
+              cityDistrict: cityDistrict,
+              stateProvince: stateProvince,
+              countryRegion: countryRegion,
+            };
+  
+            // Save the updated data back to AsyncStorage
+            await AsyncStorage.setItem('userDetails', JSON.stringify(updatedData));
+  
             console.log('User details updated successfully');
             navigation.navigate('profile');
           } else {
@@ -106,12 +124,12 @@ export default function PersonalInfoScreen() {
         }
       } catch (error) {
         console.log('Error saving user details:', error);
-      }
-      finally {
+      } finally {
         setLoading(false);
       }
     }
   };
+  
   
   const handleConfirmDate = () => {
     setDateOfBirth(temporaryDate);

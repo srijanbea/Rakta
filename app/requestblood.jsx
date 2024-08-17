@@ -14,9 +14,13 @@ export default function BloodRequestScreen() {
 
   const bloodGroups = [
     { type: 'A+', name: 'A Positive' },
+    { type: 'A-', name: 'A Negative' },
     { type: 'B+', name: 'B Positive' },
+    { type: 'B-', name: 'B Negative' },
     { type: 'O+', name: 'O Positive' },
+    { type: 'O-', name: 'O Negative' },
     { type: 'AB+', name: 'AB Positive' },
+    { type: 'AB-', name: 'AB Negative' },
   ];
 
   const handleBloodGroupSelect = (group) => {
@@ -26,10 +30,6 @@ export default function BloodRequestScreen() {
   const handleDateChange = (date) => {
     setSelectedDate(date.dateString);
     setIsModalVisible(false);
-  };
-
-  const handleRequesterSelect = (type) => {
-    setSelectedRequester(type);
   };
 
   const handleRequestBlood = () => {
@@ -56,18 +56,13 @@ export default function BloodRequestScreen() {
               ]}
               onPress={() => handleBloodGroupSelect(group)}
               accessible={true}
-              accessibilityLabel={`Select ${group.name}`}
+              accessibilityLabel={`Select ${group.type}`}
             >
-              <View style={[
-                styles.iconContainer,
-                selectedBloodGroup === group.type && styles.iconContainerSelected,
-              ]}>
-                <Ionicons
-                  name={selectedBloodGroup === group.type ? "water-outline" : "water"}
-                  size={28}
-                  color={selectedBloodGroup === group.type ? '#ffffff' : '#004aad'}
-                />
-              </View>
+              <Ionicons
+                name="water"
+                size={28}
+                color={selectedBloodGroup === group.type ? '#ffffff' : '#004aad'}
+              />
               <Text
                 style={[
                   styles.bloodGroupText,
@@ -75,12 +70,6 @@ export default function BloodRequestScreen() {
                 ]}
               >
                 {group.type}
-              </Text>
-              <Text style={[
-                styles.bloodGroupSubText,
-                selectedBloodGroup === group.type && styles.bloodGroupSubTextSelected,
-              ]}>
-                {group.name} ({group.type})
               </Text>
             </TouchableOpacity>
           ))}
@@ -91,7 +80,7 @@ export default function BloodRequestScreen() {
           <TextInput
             style={styles.unitInput}
             keyboardType="numeric"
-            placeholder="Enter amount in mL"
+            placeholder="Enter amount in ml"
             placeholderTextColor="#aaa"
             value={bloodAmount}
             onChangeText={(text) => setBloodAmount(text)}
@@ -99,7 +88,7 @@ export default function BloodRequestScreen() {
         </View>
 
         <View style={styles.scheduleOptionContainer}>
-          <Text style={styles.scheduleOptionText}>Schedule for Later:</Text>
+          <Text style={styles.scheduleOptionText}>Schedule for Later :</Text>
           <Switch
             value={isScheduled}
             onValueChange={(value) => setIsScheduled(value)}
@@ -117,27 +106,6 @@ export default function BloodRequestScreen() {
             </Text>
           </TouchableOpacity>
         )}
-
-        <View style={styles.actionButtons}>
-          <TouchableOpacity
-            style={[
-              styles.meButton,
-              selectedRequester === 'Me' && styles.meButtonSelected
-            ]}
-            onPress={() => handleRequesterSelect('Me')}
-          >
-            <Text style={styles.meButtonText}>Me</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.otherButton,
-              selectedRequester === 'Other' && styles.otherButtonSelected
-            ]}
-            onPress={() => handleRequesterSelect('Other')}
-          >
-            <Text style={styles.otherButtonText}>Other</Text>
-          </TouchableOpacity>
-        </View>
 
         <TouchableOpacity 
           style={[
@@ -196,52 +164,35 @@ const styles = StyleSheet.create({
     color: '#333',
     fontWeight: 'bold',
     marginBottom: 20,
+    
   },
   bloodGroupContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    width: '100%',
     marginBottom: 20,
   },
   bloodGroupButton: {
-    width: '45%',
-    height: 100,
+    width: '22%', // Adjust width to fit 4 cards in a row
+    aspectRatio: 1, // Makes the height equal to the width
     backgroundColor: '#ffffff',
     borderRadius: 12,
     marginBottom: 15,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#004aad',
-    elevation: 3,
+    elevation: 5, // Adding shadow to the card
   },
   bloodGroupButtonSelected: {
-    backgroundColor: '#004aad',
-    borderColor: '#004aad',
-  },
-  iconContainer: {
-    backgroundColor: '#ffffff',
-    borderRadius: 20,
-    padding: 10,
-    elevation: 5,
-  },
-  iconContainerSelected: {
     backgroundColor: '#004aad',
   },
   bloodGroupText: {
     fontSize: 18,
     color: '#333',
-    fontWeight: '600',
+    fontWeight: 'bold',
     marginTop: 8,
   },
   bloodGroupTextSelected: {
-    color: '#ffffff',
-  },
-  bloodGroupSubText: {
-    fontSize: 12,
-    color: '#555',
-  },
-  bloodGroupSubTextSelected: {
     color: '#ffffff',
   },
   unitContainer: {
@@ -260,7 +211,6 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     fontSize: 16,
     color: '#333',
-    borderBottomWidth: 1,
     borderBottomColor: '#004aad',
   },
   scheduleOptionContainer: {
@@ -289,42 +239,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
   },
-  actionButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    marginBottom: 20,
-  },
-  meButton: {
-    flex: 1,
-    backgroundColor: '#004aad',
-    borderRadius: 12,
-    padding: 15,
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  meButtonSelected: {
-    backgroundColor: '#002f7e',
-  },
-  meButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
-  },
-  otherButton: {
-    flex: 1,
-    backgroundColor: '#004aad',
-    borderRadius: 12,
-    padding: 15,
-    alignItems: 'center',
-    marginLeft: 10,
-  },
-  otherButtonSelected: {
-    backgroundColor: '#002f7e',
-  },
-  otherButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
-  },
   requestButton: {
     backgroundColor: '#004aad',
     borderRadius: 12,
@@ -335,39 +249,39 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   requestButtonDisabled: {
-    backgroundColor: '#aaa',
+    backgroundColor: '#004aad',
   },
   requestButtonText: {
     color: '#ffffff',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
   },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
     backgroundColor: '#ffffff',
     borderRadius: 12,
+    width: '90%',
     padding: 20,
-    width: '80%',
     alignItems: 'center',
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 15,
   },
   calendarContainer: {
     width: '100%',
-    marginBottom: 20,
   },
   closeButton: {
     backgroundColor: '#004aad',
     borderRadius: 12,
-    padding: 10,
+    padding: 15,
+    marginTop: 20,
     alignItems: 'center',
     width: '100%',
   },

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator, Switch } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, ActivityIndicator, Switch, RefreshControl } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from 'expo-router';
 import BottomNavBar from './bottomnavbar';
@@ -9,6 +9,7 @@ import { getAuth } from 'firebase/auth';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
 import { storage, db } from '../firebaseConfig'; // Import firebase configuration
+import { useFocusEffect } from '@react-navigation/native';
 
 export default function ProfileScreen() {
   const [fullName, setFullName] = useState('');
@@ -22,6 +23,9 @@ export default function ProfileScreen() {
   const [loadingProfilePicture, setLoadingProfilePicture] = useState(false); // New state for loading
   const [availableToDonate, setAvailableToDonate] = useState(''); // New state for availability
   const navigation = useNavigation();
+  const [refreshing, setRefreshing] = useState(false);
+
+
 
   const handleNavigateToUpdateProfileInfo = () => {
     navigation.navigate('updateprofileinfo');
@@ -31,40 +35,53 @@ export default function ProfileScreen() {
     navigation.navigate('updatemedicalinfo');
   };
 
-  useEffect(() => {
-    const fetchUserDetails = async () => {
-      try {
-        const userDetailsJson = await AsyncStorage.getItem('userDetails');
-        if (userDetailsJson) {
-          const userDetails = JSON.parse(userDetailsJson);
-          setFullName(userDetails.fullName);
-          setEmail(userDetails.email);
+  // Move the fetchUserDetails function outside the useEffect hook
+const fetchUserDetails = async () => {
+  try {
+    const userDetailsJson = await AsyncStorage.getItem('userDetails');
+    if (userDetailsJson) {
+      const userDetails = JSON.parse(userDetailsJson);
+      setFullName(userDetails.fullName);
+      setEmail(userDetails.email);
 
-  
-          const dob = new Date(userDetails.dateOfBirth);
-          const age = new Date().getFullYear() - dob.getFullYear();
-          setDateOfBirth(age + " yrs");
-          setCountryRegion(userDetails.countryRegion);
-          setBloodGroup(userDetails.bloodGroup);
-          setTotalBloodDonated(userDetails.totalBloodDonated);
-          setAvailableToDonate(userDetails.availableToDonate || false); // Load availability status
-  
-          // Only update profile picture if the URL has changed
-          if (userDetails.profilePicture !== profilePicture) {
-            setProfilePicture(userDetails.profilePicture || '');
-          }
-        } else {
-          console.log('Error', 'No user details found.');
-        }
-      } catch (error) {
-        console.log('Error retrieving user details:', error);
-      } finally {
-        setLoading(false);
+      const dob = new Date(userDetails.dateOfBirth);
+      const age = new Date().getFullYear() - dob.getFullYear();
+      setDateOfBirth(age + " yrs");
+      setCountryRegion(userDetails.countryRegion);
+      setBloodGroup(userDetails.bloodGroup);
+      setTotalBloodDonated(userDetails.totalBloodDonated);
+      setAvailableToDonate(userDetails.availableToDonate || false); // Load availability status
+
+      // Only update profile picture if the URL has changed
+      if (userDetails.profilePicture !== profilePicture) {
+        setProfilePicture(userDetails.profilePicture || '');
       }
-    };
-  
-    fetchUserDetails();
-  }, [profilePicture]); // This dependency might cause issues, remove if unnecessary
+    } else {
+      console.log('Error', 'No user details found.');
+    }
+  } catch (error) {
+    console.log('Error retrieving user details:', error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+useFocusEffect(
+  React.useCallback(() => {
+    fetchUserDetails(); // Fetch user details when screen is focused
+  }, [profilePicture]) // Dependency array includes profilePicture
+);
+
+const onRefresh = async () => {
+  setRefreshing(true);
+  try {
+    await fetchUserDetails(); // Call the fetchUserDetails function on refresh
+  } catch (error) {
+    console.log('Error refreshing user details:', error);
+  } finally {
+    setRefreshing(false);
+  }
+};
 
   const handleLogout = async () => {
     try {
@@ -206,7 +223,13 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      
+      <ScrollView 
+        contentContainerStyle={styles.scrollContainer}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} /> // Add RefreshControl
+        }
+      >
         <View style={styles.header}>
           <View style={styles.headerTextContainer}>
             <Text style={styles.headerText}>{fullName}</Text>
@@ -433,7 +456,7 @@ const styles = StyleSheet.create({
     height: 60
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: 17,
     color: '#004aad',
     fontWeight: 'normal',
     flex: 1,

@@ -2,50 +2,49 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-export default function DonorProfile() {
-
+export default function DonorCard() {
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.headerTextContainer}>
-          <Text style={styles.headerText}>Donor Profile</Text>
-          <TouchableOpacity style={styles.editButton}>
-            <Icon name="edit" size={8} color="#004aad" />
-            <Text style={styles.editButtonText}>Edit Profile</Text>
-          </TouchableOpacity>
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.cardContainer}>
+        <View style={styles.header}>
+          <View style={styles.headerTextContainer}>
+            <Text style={styles.headerText}>My Donor Card</Text>
+          </View>
         </View>
-      </View>
 
-      <View style={styles.profileSection}>
-  <Image source={require('../assets/images/placeholder.jpg')} style={styles.profileImage} />
-  <View style={styles.profileDetails}>
-    <Text style={styles.profileName}>Sudeep Poudel</Text>
-    <View style={styles.profileDescription}>
-    <View style={styles.leftInfoColumn}>
-        <Text style={styles.profileLabel}>Blood Group</Text>
-        <Text style={styles.profileValue}>O+</Text>
-      </View>
-      <View style={styles.rightInfoColumn}>
-        <Text style={styles.profileLabel}>Donations</Text>
-        <Text style={styles.profileValue}>3</Text>
-      </View>
-    </View>
-  </View>
-</View>
+        <View style={styles.profileSection}>
+          <Image source={require('../assets/images/placeholder.jpg')} style={styles.profileImage} />
+          <View style={styles.profileDetails}>
+            <Text style={styles.profileName}>Sudeep Poudel</Text>
+            <View style={styles.profileDescription}>
+              <View style={styles.infoColumn}>
+                <Text style={styles.profileLabel}>Blood Group</Text>
+                <Text style={styles.profileValue}>O+</Text>
+              </View>
+              <View style={styles.infoColumn}>
+                <Text style={styles.profileLabel}>Donations</Text>
+                <Text style={styles.profileValue}>3</Text>
+              </View>
+              <View style={styles.infoColumn}>
+                <Text style={styles.profileLabel}>BMI</Text>
+                <Text style={styles.profileValue}>22.5</Text>
+              </View>
+            </View>
+          </View>
+        </View>
 
+        <View style={styles.infoSection}>
+          <Text style={styles.infoLabel}>Donor ID</Text>
+          <Text style={styles.infoText}>123456</Text>
+          <Text style={styles.infoLabel}>Last Donation Date</Text>
+          <Text style={styles.infoText}>2024-08-16</Text>
+          <Text style={styles.infoLabel}>Available to Donate</Text>
+          <Text style={styles.infoText}>Yes</Text>
+        </View>
 
-
-      <View style={styles.infoSection}>
-        <Text style={styles.infoLabel}>Mobile No.</Text>
-        <Text style={styles.infoText}>+977-9811364390</Text>
-        <Text style={styles.infoLabel}>Address</Text>
-        <Text style={styles.infoText}>Balaju, Kathmandu</Text>
-      </View>
-
-      <View style={styles.acknowledgeSection}>
-        <Text style={styles.acknowledgeTitle}>We Acknowledge</Text>
-        <Text style={styles.acknowledgeText}>Here is a badge for you as our appreciation for your contributions made to save lives.</Text>
-        <Image source={require('../assets/images/badge.png')} style={styles.badgeImage} />
+        <TouchableOpacity style={styles.downloadButton}>
+          <Text style={styles.downloadButtonText}>Download Card</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -53,129 +52,110 @@ export default function DonorProfile() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
+    alignItems: 'center',
     backgroundColor: '#f7f7f7',
   },
-  header: {
-    backgroundColor: '#004aad',
+  cardContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
     padding: 20,
+    margin: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+    width: '90%',
+  },
+  header: {
+    marginBottom: 20,
   },
   headerTextContainer: {
-    alignItems: 'flex-end',
+    alignItems: 'center',
   },
   headerText: {
-    color: '#fff',
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: 'bold',
-  },
-  editButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderRadius: 25,
-    marginTop: 10,
-  },
-  editButtonText: {
     color: '#004aad',
-    marginLeft: 5,
-    fontSize: 8,
   },
   profileSection: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#fff',
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingVertical: 15,
+    borderRadius: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
-    position: 'relative',
+    marginBottom: 20,
   },
   profileImage: {
-    width: 110,
-    height: 110,
-    borderRadius: 60,
-    position: 'absolute',
-    top: -60,
-    left: 20,
+    width: 90,
+    height: 90,
+    borderRadius: 45,
     borderWidth: 4,
-    borderColor: '#FFF',
+    borderColor: '#fff',
   },
   profileDetails: {
+    marginLeft: 20,
     flex: 1,
-    
   },
   profileName: {
-    marginLeft: 140,
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#333',
   },
   profileDescription: {
     flexDirection: 'row',
-    marginTop: 10, // Space between profile name and the new sections
-    marginBottom: 35
+    marginTop: 10,
+    justifyContent: 'space-between',
   },
-  rightInfoColumn: {
-    position: 'absolute',
-    marginLeft: 259,
-  },
-  leftInfoColumn: {
-    position: 'absolute',
-    marginLeft: 141,
+  infoColumn: {
+    flex: 1,
+    alignItems: 'center',
   },
   profileLabel: {
-    fontSize: 10,
+    fontSize: 14,
     fontWeight: 'bold',
     color: '#666',
-    textAlign: 'center',
+    marginBottom: 4,
   },
-  
   profileValue: {
-    fontSize: 16,
+    fontSize: 18,
     color: '#333',
-    textAlign: 'left',
     fontWeight: 'bold',
   },
-    
   infoSection: {
     backgroundColor: '#fff',
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingVertical: 15,
+    borderRadius: 8,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
+    marginBottom: 20,
   },
   infoLabel: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
-    marginTop: 10,
+    marginBottom: 8,
   },
   infoText: {
     fontSize: 16,
     color: '#666',
-    marginTop: 5,
+    marginBottom: 10,
   },
-  acknowledgeSection: {
-    backgroundColor: '#f0f0f0',
-    padding: 20,
+  downloadButton: {
+    backgroundColor: '#004aad',
+    padding: 15,
+    borderRadius: 8,
     alignItems: 'center',
-  },
-  acknowledgeTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#e74c3c',
-  },
-  acknowledgeText: {
-    fontSize: 14,
-    color: '#666',
-    textAlign: 'center',
-    marginVertical: 10,
-  },
-  badgeImage: {
     marginTop: 10,
-    width: 120,
-    height: 120,
+  },
+  downloadButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
