@@ -31,6 +31,25 @@ export default function MedicalInfoScreen() {
   const hasChronicDisease = selectedChronicDiseases.length > 0 && !selectedChronicDiseases.includes('None');
   const donatedBloodRecently = hasDonatedRecently === 'Yes';
 
+  useEffect(() => {
+    const loadAsyncStorageData = async () => {
+      try {
+        const userDetailsJson = await AsyncStorage.getItem('userDetails');
+        const userDetails = userDetailsJson ? JSON.parse(userDetailsJson) : {};
+
+        if (userDetails) {
+          setSelectedBloodType(userDetails.bloodGroup || '');
+          setSelectedHeight(userDetails.height || '170');
+          setSelectedWeight(userDetails.weight || '70');
+        }
+      } catch (error) {
+        console.error('Error loading data from AsyncStorage:', error);
+      }
+    };
+
+    loadAsyncStorageData();
+  }, []);
+
   const validateInputs = () => {
     let valid = true;
     const newErrors = { height: '', weight: '', bloodType: '' };
@@ -82,6 +101,23 @@ export default function MedicalInfoScreen() {
               hasChronicDisease: hasChronicDisease,
               donatedBloodRecently: donatedBloodRecently,
             }, { merge: true });
+
+            // Retrieve existing AsyncStorage data and merge with new data
+            const existingDataJson = await AsyncStorage.getItem('userDetails');
+            let existingData = existingDataJson ? JSON.parse(existingDataJson) : {};
+  
+            // Merge the new data with existing data
+            const updatedData = {
+              ...existingData,
+              bloodGroup: selectedBloodType,
+              height: selectedHeight,
+              weight: selectedWeight,
+              hasChronicDisease: hasChronicDisease,
+              donatedBloodRecently: donatedBloodRecently,
+            };
+  
+            // Save the updated data back to AsyncStorage
+            await AsyncStorage.setItem('userDetails', JSON.stringify(updatedData));
   
             console.log('User details updated successfully');
             navigation.reset({

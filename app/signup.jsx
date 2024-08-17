@@ -92,6 +92,7 @@ export default function SignUpScreen() {
                     totalBloodDonated: 0,
                     totalBloodRequested: 0,
                     availableToDonate: false,
+                    donorId: '',
                 });
 
                 Alert.alert(

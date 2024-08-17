@@ -8,10 +8,13 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { LineChart } from 'react-native-chart-kit';
 import BottomNavBar from './bottomnavbar';
 import { format } from 'date-fns';
+import { useFocusEffect } from '@react-navigation/native';
+
 
 const screenWidth = Dimensions.get('window').width;
 
 export default function DashboardScreen() {
+  const [isFirstFetch, setIsFirstFetch] = useState(true);
   const [uid, setUid] = useState('');
   const [email, setEmail] = useState('');
   const [fullName, setFullName] = useState('');
@@ -227,11 +230,17 @@ export default function DashboardScreen() {
     }
   }, [firestore]);
 
-  useEffect(() => {
-    fetchUserDetails();
-    fetchLiveData();
-    calculateTotalBloodDonation();
-  }, [fetchUserDetails, fetchLiveData, calculateTotalBloodDonation]);
+  useFocusEffect(
+    useCallback(() => {
+      if (isFirstFetch) {
+        fetchUserDetails();
+        fetchLiveData();
+        calculateTotalBloodDonation();
+        setIsFirstFetch(false); // Prevent future auto-refresh on navigation
+      }
+    }, [isFirstFetch, fetchUserDetails, fetchLiveData, calculateTotalBloodDonation])
+  );
+  
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -291,9 +300,9 @@ export default function DashboardScreen() {
         }
         
         <View style={styles.optionsContainer}>
-          <TouchableOpacity style={styles.optionCard} onPress={() => navigation.navigate('donorprofile')}>
+        <TouchableOpacity style={styles.optionCard} onPress={() => navigation.navigate('donorprofile')}>
             <Icon name="face" size={35} color="#004aad" />
-            <Text style={styles.optionTitle}>My Donor Profile</Text>
+            <Text style={styles.optionTitle}>My Donor Card</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.optionCard} onPress={() => navigation.navigate('donateblood')}>
             <Icon name="bloodtype" size={35} color="#004aad" />
